@@ -206,4 +206,12 @@ isolated function testCloseReleasesProvider() returns error? {
     CredentialProvider staticProvider = check new (staticAuth);
     Credentials _ = check staticProvider.getCredentials();
     check staticProvider.close();
+
+    Credentials|Error credentials = staticProvider.getCredentials();
+    if credentials is Credentials {
+        test:assertFail("Expected an error when resolving credentials after close");
+    } else {
+        test:assertTrue(credentials.message().includes("already closed"),
+            "Unexpected error message: " + credentials.message());
+    }
 }

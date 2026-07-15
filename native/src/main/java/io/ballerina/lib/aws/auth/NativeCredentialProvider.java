@@ -34,7 +34,6 @@ public final class NativeCredentialProvider {
 
     private static final String NATIVE_PROVIDER = "nativeProvider";
 
-    // Constants related to the `Credentials` record
     private static final String CREDENTIALS_RECORD = "Credentials";
     private static final BString CREDENTIALS_ACCESS_KEY_ID = StringUtils.fromString("accessKeyId");
     private static final BString CREDENTIALS_SECRET_ACCESS_KEY = StringUtils.fromString("secretAccessKey");
@@ -66,8 +65,9 @@ public final class NativeCredentialProvider {
     public static Object getCredentials(BObject bProvider) {
         Object provider = bProvider.getNativeData(NATIVE_PROVIDER);
         if (!(provider instanceof AwsCredentialsProvider credentialsProvider)) {
-            return CommonUtils.createCredentialResolutionError("Credential provider is not initialized",
-                    new IllegalStateException("Credential provider is not initialized"));
+            return CommonUtils.createCredentialResolutionError(
+                    "Credential provider is not initialized or already closed",
+                    new IllegalStateException("Credential provider is not initialized or already closed"));
         }
         try {
             AwsCredentials credentials = credentialsProvider.resolveCredentials();
@@ -99,6 +99,8 @@ public final class NativeCredentialProvider {
             if (provider instanceof AwsCredentialsProvider credentialsProvider) {
                 ProviderFactory.closeProvider(credentialsProvider);
             }
+            // Clear the stale reference
+            bProvider.addNativeData(NATIVE_PROVIDER, null);
             return null;
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while closing the credential provider: %s",

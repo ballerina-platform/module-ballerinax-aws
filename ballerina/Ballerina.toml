@@ -5,7 +5,7 @@ name = "aws.auth"
 version = "0.1.0"
 license = ["Apache-2.0"]
 authors = ["Ballerina"]
-keywords = ["Security/Authentication", "Vendor/Amazon", "Type/Library", "AWS", "SigV4", "credentials"]
+keywords = ["Security/Authentication", "Vendor/Amazon", "AWS", "SigV4", "credentials"]
 icon = "icon.png"
 repository = "https://github.com/ballerina-platform/module-ballerinax-aws.auth"
 

@@ -46,7 +46,6 @@ public final class NativeEndpointResolver {
      * @param dualstack   whether the dualstack endpoint variant is requested
      * @return the endpoint host as a Ballerina string (no scheme), or a
      * Ballerina {@code aws.auth:Error} if the bundled metadata cannot resolve
-     * it (the caller falls back to pattern construction)
      */
     public static Object resolveEndpointHost(BString serviceName, BString region, boolean fips, boolean dualstack) {
         try {

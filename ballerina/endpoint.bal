@@ -46,7 +46,7 @@ public isolated function resolveEndpoint(string serviceName, Region|string regio
     return "https://" + hostPrefix + "." + region + "." + dnsSuffix(region, config.dualstack);
 }
 
-# Resolves only the host part of the endpoint — useful for request signing.
+# Resolves only the host part of the endpoint.
 # ```ballerina
 # string host = auth:resolveEndpointHost("sns", auth:US_EAST_1);
 # // "sns.us-east-1.amazonaws.com"
