@@ -25,3 +25,15 @@ isolated function externGetCredentials(CredentialProvider provider) returns Cred
     name: "getCredentials",
     'class: "io.ballerina.lib.aws.auth.NativeCredentialProvider"
 } external;
+
+isolated function externGetSignedHeaders(SignatureRequest req, Credentials credentials, Region|string region,
+        string serviceName, string? testAmzDate) returns map<string>|Error = @java:Method {
+    name: "getSignedHeaders",
+    'class: "io.ballerina.lib.aws.auth.NativeSigner"
+} external;
+
+isolated function externResolveEndpointHost(string serviceName, Region|string region, boolean fips,
+        boolean dualstack) returns string|Error = @java:Method {
+    name: "resolveEndpointHost",
+    'class: "io.ballerina.lib.aws.auth.NativeEndpointResolver"
+} external;

@@ -34,7 +34,6 @@ import java.util.Objects;
  * Common utility functions for the Ballerina AWS Auth module.
  */
 final class CommonUtils {
-    // Constants related to `Error`
     private static final String ERROR = "Error";
     private static final String ERROR_DETAILS = "ErrorDetails";
     private static final BString ERROR_DETAILS_HTTP_STATUS_CODE = StringUtils.fromString("httpStatusCode");

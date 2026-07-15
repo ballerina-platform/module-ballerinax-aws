@@ -25,106 +25,163 @@ public const DEFAULT_CREDENTIALS = "DEFAULT_CREDENTIALS";
 public type AuthConfig StaticAuthConfig|ProfileAuthConfig|AssumeRoleConfig|WebIdentityConfig|SsoAuthConfig|ProcessAuthConfig|DEFAULT_CREDENTIALS;
 
 # Represents static AWS credentials.
-#
-# + accessKeyId - AWS access key ID
-# + secretAccessKey - AWS secret access key
-# + sessionToken - AWS session token, required only for temporary credentials
 public type StaticAuthConfig record {|
+    # AWS access key ID
     string accessKeyId;
+    # AWS secret access key
     string secretAccessKey;
+    # AWS session token, required only for temporary credentials
     string sessionToken?;
 |};
 
 # Represents AWS credentials loaded from a named profile in a local AWS
 # credentials file (as created by `aws configure`).
-#
-# + profileName - The named profile to use
-# + credentialsFilePath - Path to the AWS credentials file
 public type ProfileAuthConfig record {|
+    # The named profile to use
     string profileName = "default";
+    # Path to the AWS credentials file
     string credentialsFilePath = "~/.aws/credentials";
 |};
 
 # Represents temporary credentials obtained by assuming an IAM role via AWS STS.
-# The base identity used to call STS is itself an `AuthConfig`, so a role can be
-# assumed from any other credential source.
-#
-# + roleArn - ARN of the IAM role to assume
-# + roleSessionName - Identifier for the assumed-role session; a unique
-# `ballerina-aws-auth-<timestamp>` name is generated if not provided
-# + externalId - External ID for third-party cross-account trust, if the role requires one
-# + duration - Validity period of each assumed-role session in seconds
-# + stsRegion - Region of the STS endpoint to call
-# + sourceCredentials - Credential source used to authenticate the AssumeRole call
 public type AssumeRoleConfig record {|
+    # ARN of the IAM role to assume
     string roleArn;
+    # Identifier for the assumed-role session; a unique `ballerina-aws-auth-<timestamp>`
+    # name is generated if not provided
     string roleSessionName?;
+    # External ID for third-party cross-account trust, if the role requires one
     string externalId?;
+    # Validity period of each assumed-role session in seconds
     int duration = 3600;
+    # Region of the STS endpoint to call
     string stsRegion = "us-east-1";
+    # Credential source used to authenticate the AssumeRole call
     AuthConfig sourceCredentials = DEFAULT_CREDENTIALS;
 |};
 
 # Represents temporary credentials obtained by exchanging a web identity (OIDC)
-# token for an IAM role via AWS STS — e.g. EKS IAM Roles for Service Accounts
-# (IRSA) or CI/CD OIDC federation.
-#
-# + roleArn - ARN of the IAM role to assume
-# + webIdentityTokenFile - Path to the file containing the OIDC token (JWT)
-# + roleSessionName - Identifier for the assumed-role session; a unique
-# `ballerina-aws-auth-<timestamp>` name is generated if not provided
-# + stsRegion - Region of the STS endpoint to call
+# token for an IAM role via AWS STS
 public type WebIdentityConfig record {|
+    # ARN of the IAM role to assume
     string roleArn;
+    # Path to the file containing the OIDC token (JWT)
     string webIdentityTokenFile;
+    # Identifier for the assumed-role session; a unique `ballerina-aws-auth-<timestamp>`
+    # name is generated if not provided
     string roleSessionName?;
+    # Region of the STS endpoint to call
     string stsRegion = "us-east-1";
 |};
 
 # Represents credentials obtained from an AWS IAM Identity Center (SSO) session.
 # Requires an active session created out-of-band with `aws sso login`; the cached
 # session token in `~/.aws/sso/cache` is exchanged for role credentials.
-#
-# + ssoStartUrl - The Identity Center start URL (e.g. `https://myorg.awsapps.com/start`)
-# + ssoRegion - Region in which IAM Identity Center is configured
-# + accountId - AWS account ID to get credentials for
-# + roleName - Permission-set role name to get credentials for
-# + ssoSessionName - Name of the `sso-session` block used at `aws sso login`,
-# for logins configured the modern way (`[sso-session <name>]` in `~/.aws/config`).
-# When set, the cached token is located by the session name and expiring tokens
-# are refreshed automatically; when absent, the token cached under the start URL
-# by a legacy `aws sso login` is used as is
 public type SsoAuthConfig record {|
+    # The Identity Center start URL (e.g. `https://myorg.awsapps.com/start`)
     string ssoStartUrl;
+    # Region in which IAM Identity Center is configured
     string ssoRegion;
+    # AWS account ID to get credentials for
     string accountId;
+    # Permission-set role name to get credentials for
     string roleName;
+    # Name of the `sso-session` in `~/.aws/config`
+    # When set, used token cached under the session name, enables automatic token refresh.
+    # When absent, the legacy token cached under the start URL is used as is
     string ssoSessionName?;
 |};
 
 # Represents credentials supplied by an external process (the AWS
 # `credential_process` contract). The command is executed and must print a JSON
-# credential document to stdout. Used by IAM Roles Anywhere and corporate
-# credential brokers.
+# credential document to stdout.
 #
 # Security note: the configured command is executed with the privileges of the
 # running program. Prefer declaring it in `~/.aws/config` (`credential_process`)
 # and using `ProfileAuthConfig`/`DEFAULT_CREDENTIALS` where possible.
-#
-# + command - The command to execute
 public type ProcessAuthConfig record {|
+    # The command to execute
     string command;
 |};
 
 # Represents resolved AWS credentials, as returned by the `CredentialProvider`.
-# Values are a point-in-time snapshot; fetch credentials from the provider per
-# request rather than caching this record, so refreshed credentials are picked up.
-#
-# + accessKeyId - AWS access key ID
-# + secretAccessKey - AWS secret access key
-# + sessionToken - Session token, present only for temporary credentials
 public type Credentials record {
+    # AWS access key ID
     string accessKeyId;
+    # AWS secret access key
     string secretAccessKey;
+    # Session token, present only for temporary credentials
     string sessionToken?;
 };
+
+# Endpoint resolution options.
+public type EndpointConfig record {|
+    # Use the FIPS 140-validated endpoint variant (`{service}-fips.{region}...`)
+    boolean fips = false;
+    # Use the dualstack (IPv4/IPv6) endpoint variant (`...api.aws`)
+    boolean dualstack = false;
+    # Full endpoint URL override (e.g. `http://localhost:4566`). When set,
+    # all other options are ignored and the value is returned as given
+    string customEndpoint?;
+|};
+
+# An HTTP request to be signed with AWS Signature Version 4.
+public type SignatureRequest record {|
+    # HTTP method in upper case (`GET`, `POST`, ...)
+    string method;
+    # Target host (e.g. `sns.us-east-1.amazonaws.com`)
+    string host;
+    # Request path, unencoded
+    string path = "/";
+    # Query parameters, unencoded
+    map<string> queryParams = {};
+    # Additional headers to sign (e.g. `content-type`); `host` and `x-amz-date` are always added
+    map<string> headers = {};
+    # Request body
+    byte[] payload = [];
+    # Sign the payload as `UNSIGNED-PAYLOAD` (S3 streaming)
+    boolean unsignedPayload = false;
+    # Use S3 path semantics: segments encoded once and not normalized
+    boolean s3PathMode = false;
+|};
+
+# AWS regions.
+public enum Region {
+    AF_SOUTH_1 = "af-south-1",
+    AP_EAST_1 = "ap-east-1",
+    AP_EAST_2 = "ap-east-2",
+    AP_NORTHEAST_1 = "ap-northeast-1",
+    AP_NORTHEAST_2 = "ap-northeast-2",
+    AP_NORTHEAST_3 = "ap-northeast-3",
+    AP_SOUTH_1 = "ap-south-1",
+    AP_SOUTH_2 = "ap-south-2",
+    AP_SOUTHEAST_1 = "ap-southeast-1",
+    AP_SOUTHEAST_2 = "ap-southeast-2",
+    AP_SOUTHEAST_3 = "ap-southeast-3",
+    AP_SOUTHEAST_4 = "ap-southeast-4",
+    AP_SOUTHEAST_5 = "ap-southeast-5",
+    AP_SOUTHEAST_7 = "ap-southeast-7",
+    CA_CENTRAL_1 = "ca-central-1",
+    CA_WEST_1 = "ca-west-1",
+    CN_NORTH_1 = "cn-north-1",
+    CN_NORTHWEST_1 = "cn-northwest-1",
+    EU_CENTRAL_1 = "eu-central-1",
+    EU_CENTRAL_2 = "eu-central-2",
+    EU_NORTH_1 = "eu-north-1",
+    EU_SOUTH_1 = "eu-south-1",
+    EU_SOUTH_2 = "eu-south-2",
+    EU_WEST_1 = "eu-west-1",
+    EU_WEST_2 = "eu-west-2",
+    EU_WEST_3 = "eu-west-3",
+    IL_CENTRAL_1 = "il-central-1",
+    ME_CENTRAL_1 = "me-central-1",
+    ME_SOUTH_1 = "me-south-1",
+    MX_CENTRAL_1 = "mx-central-1",
+    SA_EAST_1 = "sa-east-1",
+    US_EAST_1 = "us-east-1",
+    US_EAST_2 = "us-east-2",
+    US_GOV_EAST_1 = "us-gov-east-1",
+    US_GOV_WEST_1 = "us-gov-west-1",
+    US_WEST_1 = "us-west-1",
+    US_WEST_2 = "us-west-2"
+}

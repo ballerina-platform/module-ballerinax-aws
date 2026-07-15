@@ -169,7 +169,6 @@ public final class ProviderFactory {
 
     private static AwsCredentialsProvider buildAssumeRoleProvider(BMap<BString, Object> config,
             Set<Object> visited) {
-        // The base identity used to call STS is itself an AuthConfig — recurse.
         AwsCredentialsProvider sourceProvider = buildProvider(config.get(SOURCE_CREDENTIALS), visited);
         StsClient stsClient = StsClient.builder()
                 .region(Region.of(config.getStringValue(STS_REGION).getValue()))

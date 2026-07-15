@@ -32,6 +32,8 @@ dependencies {
     implementation group: 'software.amazon.awssdk', name: 'profiles', version: "${awsJavaSdkVersion}"
     implementation group: 'software.amazon.awssdk', name: 'regions', version: "${awsJavaSdkVersion}"
     implementation group: 'software.amazon.awssdk', name: 'http-client-spi', version: "${awsJavaSdkVersion}"
+    implementation group: 'software.amazon.awssdk', name: 'http-auth-aws', version: "${awsJavaSdkVersion}"
+    implementation group: 'software.amazon.awssdk', name: 'http-auth-spi', version: "${awsJavaSdkVersion}"
     implementation group: 'software.amazon.awssdk', name: 'identity-spi', version: "${awsJavaSdkVersion}"
     implementation group: 'software.amazon.awssdk', name: 'utils', version: "${awsJavaSdkVersion}"
 }

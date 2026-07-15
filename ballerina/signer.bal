@@ -13,3 +13,41 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
+# Signs a request with AWS Signature Version 4 and returns the headers to set
+# on the outbound request (`authorization`, `x-amz-date`, `x-amz-content-sha256`,
+# and `x-amz-security-token` for temporary credentials). Header names are
+# lowercase.
+# ```ballerina
+# auth:Credentials credentials = check credProvider.getCredentials();
+# map<string> signedHeaders = check auth:getSignedHeaders({
+#   method: "POST",
+#   host: "sns.us-east-1.amazonaws.com",
+#   headers: {"content-type": "application/x-www-form-urlencoded"},
+#   payload: "Action=CreateTopic&Name=orders".toBytes()
+# }, credentials, auth:US_EAST_1, "sns");
+# ```
+#
+# + req - The request to sign
+# + credentials - The credentials to sign with
+# + region - Target region
+# + serviceName - Signing name of the target service (e.g. `s3`, `sns`)
+# + return - Headers to set on the outbound request, or an `Error`
+public isolated function getSignedHeaders(SignatureRequest req, Credentials credentials, Region|string region,
+        string serviceName) returns map<string>|Error {
+    return getSignedHeadersAt(req, credentials, region, serviceName);
+}
+
+# Internal signing entry point with an optional fixed timestamp, 'TEST ONLY'
+# function to verify against the AWS SigV4 test vectors.
+#
+# + req - The request to sign
+# + credentials - The credentials to sign with
+# + region - Target region
+# + serviceName - Signing name of the target service
+# + testAmzDate - Fixed `yyyyMMdd'T'HHmmss'Z'` timestamp; `()` in production
+# + return - Headers to set on the outbound request, or an `Error`
+isolated function getSignedHeadersAt(SignatureRequest req, Credentials credentials, Region|string region,
+        string serviceName, string? testAmzDate = ()) returns map<string>|Error {
+    return externGetSignedHeaders(req, credentials, region, serviceName, testAmzDate);
+}
