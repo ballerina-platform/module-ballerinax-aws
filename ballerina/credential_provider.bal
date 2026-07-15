@@ -28,8 +28,8 @@ public isolated class CredentialProvider {
     # ```
     #
     # + config - The credential source configuration
-    # + return - An `auth:Error` if the configuration is invalid, or `()`
-    public isolated function init(AuthConfig config) returns Error? {
+    # + return - An `auth:CredentialResolutionError` if the configuration is invalid, or `()`
+    public isolated function init(AuthConfig config) returns CredentialResolutionError? {
         return externInitProvider(self, config);
     }
 
@@ -40,9 +40,9 @@ public isolated class CredentialProvider {
     # auth:Credentials credentials = check credProvider.getCredentials();
     # ```
     #
-    # + return - The resolved `Credentials`, or an `auth:Error` if the
+    # + return - The resolved `Credentials`, or an `auth:CredentialResolutionError` if the
     # configured source cannot supply credentials
-    public isolated function getCredentials() returns Credentials|Error {
+    public isolated function getCredentials() returns Credentials|CredentialResolutionError {
         return externGetCredentials(self);
     }
 }

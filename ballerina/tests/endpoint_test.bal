@@ -21,7 +21,6 @@ import ballerina/test;
 }
 isolated function testStandardEndpoint() {
     test:assertEquals(resolveEndpoint("sns", US_EAST_1), "https://sns.us-east-1.amazonaws.com");
-    // Plain string region codes
     test:assertEquals(resolveEndpoint("dynamodb", "eu-central-3"), "https://dynamodb.eu-central-3.amazonaws.com");
 }
 
@@ -30,9 +29,6 @@ isolated function testStandardEndpoint() {
 }
 isolated function testChinaPartition() {
     test:assertEquals(resolveEndpoint("sns", CN_NORTH_1), "https://sns.cn-north-1.amazonaws.com.cn");
-    // S3 predates the api.aws dualstack convention and uses its own legacy
-    // `dualstack.` infix pattern — a per-service exception only the SDK
-    // endpoint metadata knows.
     test:assertEquals(resolveEndpoint("s3", CN_NORTHWEST_1, {dualstack: true}),
         "https://s3.dualstack.cn-northwest-1.amazonaws.com.cn");
 }
@@ -42,9 +38,6 @@ isolated function testChinaPartition() {
 }
 isolated function testGovCloudPartition() {
     test:assertEquals(resolveEndpoint("sqs", US_GOV_WEST_1), "https://sqs.us-gov-west-1.amazonaws.com");
-    // GovCloud SQS is FIPS-by-default: the FIPS variant is the same hostname,
-    // NOT `sqs-fips.…` — another exception the SDK metadata catches that
-    // pattern construction would get wrong.
     test:assertEquals(resolveEndpoint("sqs", US_GOV_WEST_1, {fips: true}),
         "https://sqs.us-gov-west-1.amazonaws.com");
 }

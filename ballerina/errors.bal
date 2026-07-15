@@ -14,13 +14,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents an AWS Auth distinct error.
-public type Error distinct error<ErrorDetails>;
+# Represents the common error type of AWS Auth.
+public type Error distinct error;
 
-# The error details type for the AWS Auth module. The fields are populated
+# Represent the credential resolution errors.
+public type CredentialResolutionError distinct Error & error<ErrorDetails>;
+
+# Represent the SigV4 signing errors.
+public type SigningError distinct Error;
+
+# The error details type for the CredentialResolutionError. The fields are populated
 # when the failure originates from an AWS service call (e.g. STS or SSO);
-# purely local failures (an invalid configuration, a missing credentials
-# file) carry no details.
 public type ErrorDetails record {|
     # The HTTP status code for the error
     int httpStatusCode?;

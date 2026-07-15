@@ -35,6 +35,8 @@ import java.util.Objects;
  */
 final class CommonUtils {
     private static final String ERROR = "Error";
+    private static final String CREDENTIAL_RESOLUTION_ERROR = "CredentialResolutionError";
+    private static final String SIGNING_ERROR = "SigningError";
     private static final String ERROR_DETAILS = "ErrorDetails";
     private static final BString ERROR_DETAILS_HTTP_STATUS_CODE = StringUtils.fromString("httpStatusCode");
     private static final BString ERROR_DETAILS_HTTP_STATUS_TEXT = StringUtils.fromString("httpStatusText");
@@ -45,10 +47,19 @@ final class CommonUtils {
     }
 
     /**
-     * Creates an {@code aws.auth:Error}, attaching the AWS service error
-     * details when available.
+     * Creates the common {@code aws.auth:Error}.
      */
     static BError createError(String message, Throwable exception) {
+        BError cause = ErrorCreator.createError(exception);
+        return ErrorCreator.createError(
+                ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, null);
+    }
+
+    /**
+     * Creates an {@code aws.auth:CredentialResolutionError}, attaching the AWS
+     * service error details when available.
+     */
+    static BError createCredentialResolutionError(String message, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
         BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(
                 ModuleUtils.getModule(), ERROR_DETAILS);
@@ -64,7 +75,16 @@ final class CommonUtils {
             errorDetails.put(ERROR_DETAILS_ERROR_CODE, StringUtils.fromString(awsErrorDetails.errorCode()));
             errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE, StringUtils.fromString(awsErrorDetails.errorMessage()));
         }
+        return ErrorCreator.createError(ModuleUtils.getModule(), CREDENTIAL_RESOLUTION_ERROR,
+                StringUtils.fromString(message), cause, errorDetails);
+    }
+
+    /**
+     * Creates an {@code aws.auth:SigningError}.
+     */
+    static BError createSigningError(String message, Throwable exception) {
+        BError cause = ErrorCreator.createError(exception);
         return ErrorCreator.createError(
-                ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
+                ModuleUtils.getModule(), SIGNING_ERROR, StringUtils.fromString(message), cause, null);
     }
 }

@@ -55,7 +55,7 @@ public final class NativeCredentialProvider {
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while initializing the credential provider: %s",
                     e.getMessage());
-            return CommonUtils.createError(errorMsg, e);
+            return CommonUtils.createCredentialResolutionError(errorMsg, e);
         }
     }
 
@@ -66,7 +66,7 @@ public final class NativeCredentialProvider {
     public static Object getCredentials(BObject bProvider) {
         Object provider = bProvider.getNativeData(NATIVE_PROVIDER);
         if (!(provider instanceof AwsCredentialsProvider credentialsProvider)) {
-            return CommonUtils.createError("Credential provider is not initialized",
+            return CommonUtils.createCredentialResolutionError("Credential provider is not initialized",
                     new IllegalStateException("Credential provider is not initialized"));
         }
         try {
@@ -82,7 +82,7 @@ public final class NativeCredentialProvider {
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while resolving the AWS credentials: %s",
                     e.getMessage());
-            return CommonUtils.createError(errorMsg, e);
+            return CommonUtils.createCredentialResolutionError(errorMsg, e);
         }
     }
 }

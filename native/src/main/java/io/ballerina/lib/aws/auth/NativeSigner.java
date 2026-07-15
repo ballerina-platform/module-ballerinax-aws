@@ -142,7 +142,7 @@ public final class NativeSigner {
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while signing the request with the AWS SDK signer: %s",
                     e.getMessage());
-            return CommonUtils.createError(errorMsg, e);
+            return CommonUtils.createSigningError(errorMsg, e);
         }
     }
 

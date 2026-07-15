@@ -20,7 +20,6 @@ import ballerina/test;
     groups: ["credentialProvider"]
 }
 isolated function testDefaultCredentialsInitSucceeds() returns error? {
-    // The chain is not invoked at init.
     CredentialProvider _ = check new (DEFAULT_CREDENTIALS);
 }
 
@@ -80,8 +79,7 @@ isolated function testProfileProviderWithSessionToken() returns error? {
     groups: ["credentialProvider"]
 }
 isolated function testProcessCredentialProvider() returns error? {
-    // The credential_process contract, exercised fully locally: the command
-    // prints a credential JSON document to stdout.
+    // The command prints a credential JSON document to stdout.
     CredentialProvider provider = check new ({
         command: "cat tests/resources/process-credentials.json"
     });
@@ -94,7 +92,6 @@ isolated function testProcessCredentialProvider() returns error? {
     groups: ["credentialProvider"]
 }
 isolated function testWebIdentityInitSucceeds() returns error? {
-    // No STS call happens at init; the token file is read at resolution time.
     CredentialProvider _ = check new ({
         roleArn: "arn:aws:iam::111111111111:role/web-identity-role",
         webIdentityTokenFile: "tests/resources/web-identity-token"
@@ -105,8 +102,6 @@ isolated function testWebIdentityInitSucceeds() returns error? {
     groups: ["credentialProvider"]
 }
 isolated function testSsoMissingCachedSessionReturnsError() returns error? {
-    // Building the provider is lazy; resolution reads the local SSO cache
-    // written by `aws sso login` and must fail cleanly when it is absent.
     CredentialProvider provider = check new ({
         ssoStartUrl: "https://ballerina-aws-auth-test.awsapps.com/start",
         ssoRegion: "us-east-1",
@@ -126,8 +121,7 @@ isolated function testSsoMissingCachedSessionReturnsError() returns error? {
     groups: ["credentialProvider"]
 }
 isolated function testSsoSessionMissingCachedTokenReturnsError() returns error? {
-    // The modern sso-session flow: the token cache is looked up by the
-    // session name; a session never logged in must fail cleanly.
+    // The modern sso-session flow: the token cache is looked up by the session name
     CredentialProvider provider = check new ({
         ssoStartUrl: "https://ballerina-aws-auth-test.awsapps.com/start",
         ssoRegion: "us-east-1",
@@ -148,7 +142,6 @@ isolated function testSsoSessionMissingCachedTokenReturnsError() returns error? 
     groups: ["credentialProvider"]
 }
 isolated function testChainedAssumeRoleInitSucceeds() returns error? {
-    // A two-hop role chain (static base → hub role → spoke role) must build
     CredentialProvider _ = check new ({
         roleArn: "arn:aws:iam::222222222222:role/spoke",
         sourceCredentials: {
@@ -162,7 +155,6 @@ isolated function testChainedAssumeRoleInitSucceeds() returns error? {
     groups: ["credentialProvider"]
 }
 isolated function testCyclicSourceCredentialsRejected() {
-    // A cyclic chain rejected at init with a clear error, not a StackOverflowError.
     AssumeRoleConfig roleA = {roleArn: "arn:aws:iam::111111111111:role/A"};
     AssumeRoleConfig roleB = {roleArn: "arn:aws:iam::222222222222:role/B", sourceCredentials: roleA};
     roleA.sourceCredentials = roleB;
@@ -183,10 +175,9 @@ isolated function testMissingProfileReturnsError() {
         profileName: "nonexistent-profile-for-testing",
         credentialsFilePath: "/tmp/nonexistent-aws-credentials-file"
     });
-    if provider is CredentialProvider {
-        Credentials|Error credentials = provider.getCredentials(); // TODO: Assert exact error message
-        test:assertTrue(credentials is Error, "Expected an error for a missing credentials file");
-    }
+    test:assertTrue(provider is Error, "Expected an error for a missing credentials file");
+    test:assertEquals((<Error>provider).message(), "Error occurred while initializing the credential provider: " +
+        "Profile file '/tmp/nonexistent-aws-credentials-file' does not exist.");
 }
 
 @test:Config {

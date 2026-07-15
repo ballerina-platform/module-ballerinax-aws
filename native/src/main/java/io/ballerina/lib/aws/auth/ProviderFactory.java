@@ -41,6 +41,7 @@ import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 import software.amazon.awssdk.services.sts.auth.StsWebIdentityTokenFileCredentialsProvider;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.utils.UserHomeDirectoryUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -272,8 +273,11 @@ public final class ProviderFactory {
     }
 
     private static String expandHome(String path) {
+        // Resolve the home directory (HOME env var first, then platform fallbacks)
+        // to paths agree with the cache and credential files even
+        // when HOME is overridden (containers, CI).
         return path.startsWith("~")
-                ? System.getProperty("user.home") + path.substring(1)
+                ? UserHomeDirectoryUtils.userHomeDirectory() + path.substring(1)
                 : path;
     }
 }

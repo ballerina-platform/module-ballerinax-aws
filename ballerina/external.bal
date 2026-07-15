@@ -16,18 +16,18 @@
 
 import ballerina/jballerina.java;
 
-isolated function externInitProvider(CredentialProvider provider, AuthConfig config) returns Error? = @java:Method {
+isolated function externInitProvider(CredentialProvider provider, AuthConfig config) returns CredentialResolutionError? = @java:Method {
     name: "initProvider",
     'class: "io.ballerina.lib.aws.auth.NativeCredentialProvider"
 } external;
 
-isolated function externGetCredentials(CredentialProvider provider) returns Credentials|Error = @java:Method {
+isolated function externGetCredentials(CredentialProvider provider) returns Credentials|CredentialResolutionError = @java:Method {
     name: "getCredentials",
     'class: "io.ballerina.lib.aws.auth.NativeCredentialProvider"
 } external;
 
 isolated function externGetSignedHeaders(SignatureRequest req, Credentials credentials, Region|string region,
-        string serviceName, string? testAmzDate) returns map<string>|Error = @java:Method {
+        string serviceName, string? testAmzDate) returns map<string>|SigningError = @java:Method {
     name: "getSignedHeaders",
     'class: "io.ballerina.lib.aws.auth.NativeSigner"
 } external;
