@@ -27,7 +27,7 @@ isolated function externGetCredentials(CredentialProvider provider) returns Cred
 } external;
 
 isolated function externGetSignedHeaders(SignatureRequest req, Credentials credentials, Region|string region,
-        string serviceName, string? testAmzDate) returns map<string>|SigningError = @java:Method {
+        string serviceName) returns map<string>|SigningError = @java:Method {
     name: "getSignedHeaders",
     'class: "io.ballerina.lib.aws.auth.NativeSigner"
 } external;

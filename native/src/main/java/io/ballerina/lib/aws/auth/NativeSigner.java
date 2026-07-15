@@ -78,15 +78,36 @@ public final class NativeSigner {
      * @param bCredentials the Ballerina {@code Credentials} record
      * @param region       the target region code
      * @param serviceName  the signing name of the target service
-     * @param testAmzDate  optional fixed timestamp ({@code yyyyMMdd'T'HHmmss'Z'})
-     *                     used by tests to pin the signing clock; {@code null}
-     *                     in production
      * @return a Ballerina {@code map<string>} of headers, or a Ballerina
-     * {@code aws.auth:Error}
+     * {@code aws.auth:SigningError}
      */
-    @SuppressWarnings("unchecked")
     public static Object getSignedHeaders(BMap<BString, Object> bRequest, BMap<BString, Object> bCredentials,
-                                     BString region, BString serviceName, Object testAmzDate) {
+                                          BString region, BString serviceName) {
+        return sign(bRequest, bCredentials, region, serviceName, null);
+    }
+
+    /**
+     * Test-only entry point: signs with the signing clock pinned to the given
+     * timestamp, the output is deterministic and verifiable against the AWS
+     * SigV4 test vectors. Invoked from the module's test sources.
+     *
+     * @param bRequest     the Ballerina {@code SignatureRequest} record
+     * @param bCredentials the Ballerina {@code Credentials} record
+     * @param region       the target region code
+     * @param serviceName  the signing name of the target service
+     * @param amzDate      fixed timestamp ({@code yyyyMMdd'T'HHmmss'Z'})
+     * @return a Ballerina {@code map<string>} of headers, or a Ballerina
+     * {@code aws.auth:SigningError}
+     */
+    public static Object getSignedHeadersWithFixedTime(BMap<BString, Object> bRequest,
+                                                       BMap<BString, Object> bCredentials,
+                                                       BString region, BString serviceName, BString amzDate) {
+        return sign(bRequest, bCredentials, region, serviceName, amzDate);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object sign(BMap<BString, Object> bRequest, BMap<BString, Object> bCredentials,
+                               BString region, BString serviceName, BString fixedAmzDate) {
         try {
             AwsCredentialsIdentity identity = toIdentity(bCredentials);
             boolean s3PathMode = bRequest.getBooleanValue(S3_PATH_MODE);
@@ -119,9 +140,9 @@ public final class NativeSigner {
                         .putProperty(AwsV4HttpSigner.DOUBLE_URL_ENCODE, !s3PathMode)
                         .putProperty(AwsV4HttpSigner.NORMALIZE_PATH, !s3PathMode)
                         .putProperty(AwsV4HttpSigner.PAYLOAD_SIGNING_ENABLED, !unsignedPayload);
-                if (testAmzDate instanceof BString fixedDate) {
+                if (fixedAmzDate != null) {
                     Clock fixedClock = Clock.fixed(LocalDateTime
-                            .parse(fixedDate.getValue(), AMZ_DATE_FORMAT)
+                            .parse(fixedAmzDate.getValue(), AMZ_DATE_FORMAT)
                             .toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
                     r.putProperty(HttpSigner.SIGNING_CLOCK, fixedClock);
                 }
