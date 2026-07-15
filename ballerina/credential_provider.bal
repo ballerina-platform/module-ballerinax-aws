@@ -45,4 +45,16 @@ public isolated class CredentialProvider {
     public isolated function getCredentials() returns Credentials|CredentialResolutionError {
         return externGetCredentials(self);
     }
+
+    # Releases the resources held by the underlying credential provider
+    # (background refresh threads, HTTP connections for STS/SSO). Call when the
+    # provider is no longer needed
+    # ```ballerina
+    # check credProvider.close();
+    # ```
+    #
+    # + return - An `auth:Error` if releasing the resources fails, or `()`
+    public isolated function close() returns Error? {
+        return externCloseProvider(self);
+    }
 }

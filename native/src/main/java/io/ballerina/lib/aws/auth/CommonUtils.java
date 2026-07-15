@@ -72,8 +72,13 @@ final class CommonUtils {
                 sdkResponse.statusText().ifPresent(httpStatusTxt -> errorDetails.put(
                         ERROR_DETAILS_HTTP_STATUS_TEXT, StringUtils.fromString(httpStatusTxt)));
             }
-            errorDetails.put(ERROR_DETAILS_ERROR_CODE, StringUtils.fromString(awsErrorDetails.errorCode()));
-            errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE, StringUtils.fromString(awsErrorDetails.errorMessage()));
+            if (Objects.nonNull(awsErrorDetails.errorCode())) {
+                errorDetails.put(ERROR_DETAILS_ERROR_CODE, StringUtils.fromString(awsErrorDetails.errorCode()));
+            }
+            if (Objects.nonNull(awsErrorDetails.errorMessage())) {
+                errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE,
+                        StringUtils.fromString(awsErrorDetails.errorMessage()));
+            }
         }
         return ErrorCreator.createError(ModuleUtils.getModule(), CREDENTIAL_RESOLUTION_ERROR,
                 StringUtils.fromString(message), cause, errorDetails);

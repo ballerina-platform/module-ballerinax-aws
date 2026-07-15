@@ -46,6 +46,9 @@ public final class EndpointConfigUtils {
      */
     public static void applyEndpointConfig(AwsClientBuilder<?, ?> builder,
                                            BMap<BString, Object> bEndpointConfig) {
+        if (bEndpointConfig == null) {
+            return;
+        }
         if (bEndpointConfig.containsKey(CUSTOM_ENDPOINT)) {
             builder.endpointOverride(URI.create(
                     bEndpointConfig.getStringValue(CUSTOM_ENDPOINT).getValue()));

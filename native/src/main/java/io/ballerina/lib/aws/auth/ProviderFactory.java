@@ -41,6 +41,7 @@ import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 import software.amazon.awssdk.services.sts.auth.StsWebIdentityTokenFileCredentialsProvider;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.utils.SdkAutoCloseable;
 import software.amazon.awssdk.utils.UserHomeDirectoryUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -95,6 +96,19 @@ public final class ProviderFactory {
      */
     public static AwsCredentialsProvider buildProvider(Object bConfig) {
         return buildProvider(bConfig, Collections.newSetFromMap(new IdentityHashMap<>()));
+    }
+
+    /**
+     * Releases the resources held by a credentials provider built by this
+     * factory (background refresh threads, HTTP connections) when the provider
+     * implements {@link SdkAutoCloseable}.
+     *
+     * @param provider the credentials provider to release
+     */
+    public static void closeProvider(AwsCredentialsProvider provider) {
+        if (provider instanceof SdkAutoCloseable closeable) {
+            closeable.close();
+        }
     }
 
     /**

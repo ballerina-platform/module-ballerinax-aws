@@ -26,6 +26,11 @@ isolated function externGetCredentials(CredentialProvider provider) returns Cred
     'class: "io.ballerina.lib.aws.auth.NativeCredentialProvider"
 } external;
 
+isolated function externCloseProvider(CredentialProvider provider) returns Error? = @java:Method {
+    name: "close",
+    'class: "io.ballerina.lib.aws.auth.NativeCredentialProvider"
+} external;
+
 isolated function externGetSignedHeaders(SignatureRequest req, Credentials credentials, Region|string region,
         string serviceName) returns map<string>|SigningError = @java:Method {
     name: "getSignedHeaders",

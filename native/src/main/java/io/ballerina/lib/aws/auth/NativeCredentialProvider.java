@@ -85,4 +85,25 @@ public final class NativeCredentialProvider {
             return CommonUtils.createCredentialResolutionError(errorMsg, e);
         }
     }
+    /**
+     * Releases the resources held by the stored credentials provider
+     * (background refresh threads, HTTP connections) when the provider
+     * holds closeable resources.
+     *
+     * @param bProvider the Ballerina {@code CredentialProvider} object
+     * @return {@code null} on success, or a Ballerina {@code aws.auth:Error}
+     */
+    public static Object close(BObject bProvider) {
+        Object provider = bProvider.getNativeData(NATIVE_PROVIDER);
+        try {
+            if (provider instanceof AwsCredentialsProvider credentialsProvider) {
+                ProviderFactory.closeProvider(credentialsProvider);
+            }
+            return null;
+        } catch (Exception e) {
+            String errorMsg = String.format("Error occurred while closing the credential provider: %s",
+                    e.getMessage());
+            return CommonUtils.createError(errorMsg, e);
+        }
+    }
 }

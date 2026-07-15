@@ -196,6 +196,7 @@ clean {
 build.dependsOn ":aws.auth-native:build"
 test.dependsOn ":aws.auth-native:build"
 build.dependsOn copyToLib
+test.dependsOn copyToLib
 build.dependsOn "generatePomFileForMavenPublication"
 publishToMavenLocal.dependsOn build
 publish.dependsOn build

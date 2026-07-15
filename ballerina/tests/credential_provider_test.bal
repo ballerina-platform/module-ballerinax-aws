@@ -193,3 +193,17 @@ isolated function testEnvStaticCredentialProvider() returns error? {
     test:assertEquals(credentials.accessKeyId, testAccessKeyId);
     test:assertEquals(credentials.secretAccessKey, testSecretAccessKey);
 }
+
+@test:Config {
+    groups: ["credentialProvider"]
+}
+isolated function testCloseReleasesProvider() returns error? {
+    // Closeable provider (the default chain implements SdkAutoCloseable).
+    CredentialProvider chainProvider = check new (DEFAULT_CREDENTIALS);
+    check chainProvider.close();
+
+    // Non-closeable provider (static) — close must be a safe no-op.
+    CredentialProvider staticProvider = check new (staticAuth);
+    Credentials _ = check staticProvider.getCredentials();
+    check staticProvider.close();
+}
