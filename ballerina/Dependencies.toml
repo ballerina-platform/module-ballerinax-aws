@@ -118,7 +118,7 @@ modules = [
 
 [[package]]
 org = "ballerinax"
-name = "aws.auth"
+name = "aws"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
@@ -127,6 +127,7 @@ dependencies = [
 	{org = "ballerinai", name = "observe"}
 ]
 modules = [
-	{org = "ballerinax", packageName = "aws.auth", moduleName = "aws.auth"}
+	{org = "ballerinax", packageName = "aws", moduleName = "aws"},
+	{org = "ballerinax", packageName = "aws", moduleName = "aws.auth"}
 ]
 
