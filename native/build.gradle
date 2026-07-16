@@ -20,7 +20,7 @@ plugins {
     id 'java'
 }
 
-description = 'Aws.auth - Native'
+description = 'Aws - Native'
 
 dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
@@ -55,7 +55,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId project.group
-            artifactId "aws.auth-native"
+            artifactId "aws-native"
             version = project.version
             artifact jar
         }
@@ -64,7 +64,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerinax-aws.auth")
+            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerinax-aws")
             credentials {
                 username = System.getenv("publishUser")
                 password = System.getenv("publishPAT")

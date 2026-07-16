@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.lib.aws.auth;
+package io.ballerina.lib.aws;
 
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;

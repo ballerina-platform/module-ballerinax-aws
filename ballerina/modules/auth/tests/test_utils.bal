@@ -15,7 +15,8 @@
 // under the License.
 
 import ballerina/jballerina.java;
-isolated function getSignedHeadersAt(SignatureRequest req, Credentials credentials, Region|string region,
+import aws;
+isolated function getSignedHeadersAt(SignatureRequest req, Credentials credentials, aws:Region|string region,
         string serviceName, string testAmzDate) returns map<string>|SigningError = @java:Method {
     name: "getSignedHeadersWithFixedTime",
     'class: "io.ballerina.lib.aws.auth.NativeSigner"

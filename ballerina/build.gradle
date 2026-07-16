@@ -22,9 +22,9 @@ plugins {
     id 'io.ballerina.plugin'
 }
 
-description = 'Aws.auth - Ballerina'
+description = 'Aws - Ballerina'
 
-def packageName = "aws.auth"
+def packageName = "aws"
 def packageOrg = "ballerinax"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
@@ -193,8 +193,8 @@ clean {
     delete 'build'
 }
 
-build.dependsOn ":aws.auth-native:build"
-test.dependsOn ":aws.auth-native:build"
+build.dependsOn ":aws-native:build"
+test.dependsOn ":aws-native:build"
 build.dependsOn copyToLib
 test.dependsOn copyToLib
 build.dependsOn "generatePomFileForMavenPublication"

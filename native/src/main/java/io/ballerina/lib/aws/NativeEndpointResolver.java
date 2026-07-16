@@ -16,8 +16,9 @@
  * under the License.
  */
 
-package io.ballerina.lib.aws.auth;
+package io.ballerina.lib.aws;
 
+import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
 import software.amazon.awssdk.regions.EndpointTag;
@@ -63,14 +64,14 @@ public final class NativeEndpointResolver {
                             .build())
                     .toString();
             if (host == null || host.isEmpty()) {
-                return CommonUtils.createError("No endpoint metadata found for the given service and region",
-                        new IllegalStateException("Empty endpoint metadata result"));
+                return ErrorCreator.createError(
+                        StringUtils.fromString("No endpoint metadata found for the given service and region"));
             }
             return StringUtils.fromString(host);
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while resolving the endpoint from SDK metadata: %s",
                     e.getMessage());
-            return CommonUtils.createError(errorMsg, e);
+            return ErrorCreator.createError(StringUtils.fromString(errorMsg), ErrorCreator.createError(e));
         }
     }
 }

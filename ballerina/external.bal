@@ -16,29 +16,8 @@
 
 import ballerina/jballerina.java;
 
-isolated function externInitProvider(CredentialProvider provider, AuthConfig config) returns CredentialResolutionError? = @java:Method {
-    name: "initProvider",
-    'class: "io.ballerina.lib.aws.auth.NativeCredentialProvider"
-} external;
-
-isolated function externGetCredentials(CredentialProvider provider) returns Credentials|CredentialResolutionError = @java:Method {
-    name: "getCredentials",
-    'class: "io.ballerina.lib.aws.auth.NativeCredentialProvider"
-} external;
-
-isolated function externCloseProvider(CredentialProvider provider) returns Error? = @java:Method {
-    name: "close",
-    'class: "io.ballerina.lib.aws.auth.NativeCredentialProvider"
-} external;
-
-isolated function externGetSignedHeaders(SignatureRequest req, Credentials credentials, Region|string region,
-        string serviceName) returns map<string>|SigningError = @java:Method {
-    name: "getSignedHeaders",
-    'class: "io.ballerina.lib.aws.auth.NativeSigner"
-} external;
-
 isolated function externResolveEndpointHost(string serviceName, Region|string region, boolean fips,
-        boolean dualstack) returns string|Error = @java:Method {
+        boolean dualstack) returns string|error = @java:Method {
     name: "resolveEndpointHost",
-    'class: "io.ballerina.lib.aws.auth.NativeEndpointResolver"
+    'class: "io.ballerina.lib.aws.NativeEndpointResolver"
 } external;

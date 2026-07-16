@@ -53,7 +53,7 @@ isolated function testStaticProviderWithSessionToken() returns error? {
 isolated function testProfileCredentialProvider() returns error? {
     CredentialProvider provider = check new ({
         profileName: "test-profile",
-        credentialsFilePath: "tests/resources/credentials"
+        credentialsFilePath: "modules/auth/tests/resources/credentials"
     });
     Credentials credentials = check provider.getCredentials();
     test:assertEquals(credentials.accessKeyId, "AKIDPROFILEEXAMPLE");
@@ -67,7 +67,7 @@ isolated function testProfileCredentialProvider() returns error? {
 isolated function testProfileProviderWithSessionToken() returns error? {
     CredentialProvider provider = check new ({
         profileName: "test-profile-session",
-        credentialsFilePath: "tests/resources/credentials"
+        credentialsFilePath: "modules/auth/tests/resources/credentials"
     });
     Credentials credentials = check provider.getCredentials();
     test:assertEquals(credentials.accessKeyId, "AKIDPROFILESESSION");
@@ -81,7 +81,7 @@ isolated function testProfileProviderWithSessionToken() returns error? {
 isolated function testProcessCredentialProvider() returns error? {
     // The command prints a credential JSON document to stdout.
     CredentialProvider provider = check new ({
-        command: ["cat", "tests/resources/process-credentials.json"]
+        command: ["cat", "modules/auth/tests/resources/process-credentials.json"]
     });
     Credentials credentials = check provider.getCredentials();
     test:assertEquals(credentials.accessKeyId, "AKIDPROCESSEXAMPLE");
@@ -94,7 +94,7 @@ isolated function testProcessCredentialProvider() returns error? {
 isolated function testWebIdentityInitSucceeds() returns error? {
     CredentialProvider _ = check new ({
         roleArn: "arn:aws:iam::111111111111:role/web-identity-role",
-        webIdentityTokenFile: "tests/resources/web-identity-token"
+        webIdentityTokenFile: "modules/auth/tests/resources/web-identity-token"
     });
 }
 

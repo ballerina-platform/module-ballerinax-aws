@@ -8,6 +8,7 @@ authors = ["Ballerina"]
 keywords = ["Security/Authentication", "Vendor/Amazon", "Type/Library", "AWS", "SigV4", "credentials"]
 icon = "icon.png"
 repository = "https://github.com/ballerina-platform/module-ballerinax-aws"
+export = ["aws", "aws.auth"]
 
 [build-options]
 observabilityIncluded = true
