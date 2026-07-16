@@ -55,7 +55,7 @@ public type AssumeRoleConfig record {|
     # Validity period of each assumed-role session in seconds
     int duration = 3600;
     # Region of the STS endpoint to call
-    string stsRegion = "us-east-1";
+    Region|string stsRegion = US_EAST_1;
     # Credential source used to authenticate the AssumeRole call
     AuthConfig sourceCredentials = DEFAULT_CREDENTIALS;
 |};
@@ -71,7 +71,7 @@ public type WebIdentityConfig record {|
     # name is generated if not provided
     string roleSessionName?;
     # Region of the STS endpoint to call
-    string stsRegion = "us-east-1";
+    Region|string stsRegion = US_EAST_1;
 |};
 
 # Represents credentials obtained from an AWS IAM Identity Center (SSO) session.
@@ -81,7 +81,7 @@ public type SsoAuthConfig record {|
     # The Identity Center start URL (e.g. `https://myorg.awsapps.com/start`)
     string ssoStartUrl;
     # Region in which IAM Identity Center is configured
-    string ssoRegion;
+    Region|string ssoRegion;
     # AWS account ID to get credentials for
     string accountId;
     # Permission-set role name to get credentials for
