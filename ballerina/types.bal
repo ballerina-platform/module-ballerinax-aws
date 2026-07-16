@@ -100,8 +100,10 @@ public type SsoAuthConfig record {|
 # running program. Prefer declaring it in `~/.aws/config` (`credential_process`)
 # and using `ProfileAuthConfig`/`DEFAULT_CREDENTIALS` where possible.
 public type ProcessAuthConfig record {|
-    # The command to execute
-    string command;
+    # The command to execute, as separate arguments with the executable first
+    # (e.g. `["/usr/local/bin/aws_signing_helper", "credential-process", "--certificate", ...]`).
+    # Executed directly, without a shell
+    string[] command;
 |};
 
 # Represents resolved AWS credentials, as returned by the `CredentialProvider`.

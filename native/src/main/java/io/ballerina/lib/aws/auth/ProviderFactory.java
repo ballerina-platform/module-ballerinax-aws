@@ -53,7 +53,6 @@ import java.util.Collections;
 import java.util.HexFormat;
 import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -241,11 +240,9 @@ public final class ProviderFactory {
     }
 
     private static AwsCredentialsProvider buildProcessProvider(BMap<BString, Object> config) {
-        // The config value is a shell command line
-        String commandLine = config.getStringValue(COMMAND).getValue();
-        List<String> command = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows")
-                ? List.of("cmd.exe", "/C", commandLine)
-                : List.of("sh", "-c", commandLine);
+        // The config value is the argv (executable + arguments); executed
+        // directly, No shell metacharacter interpretation can occur.
+        List<String> command = List.of(config.getArrayValue(COMMAND).getStringArray());
         return ProcessCredentialsProvider.builder()
                 .command(command)
                 .build();

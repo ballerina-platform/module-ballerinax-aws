@@ -32,18 +32,18 @@
 # + return - The endpoint URL (e.g. `https://sns.us-east-1.amazonaws.com`)
 public isolated function resolveEndpoint(string serviceName, Region|string region,
         EndpointConfig config = {}) returns string {
-    string? customEndpoint = config?.customEndpoint;
+    string? customEndpoint = config.customEndpoint;
     if customEndpoint is string {
         return customEndpoint;
     }
     string|error host = externResolveEndpointHost(serviceName, region, config.fips, config.dualstack);
     if host is string && host != "" {
-        return "https://" + host;
+        return string `https://${host}`;
     }
     // Fallback: standard pattern construction for services/regions unknown to
     // the bundled SDK metadata.
     string hostPrefix = config.fips ? serviceName + "-fips" : serviceName;
-    return "https://" + hostPrefix + "." + region + "." + dnsSuffix(region, config.dualstack);
+    return string `https://${hostPrefix}.${region}.${dnsSuffix(region, config.dualstack)}`;
 }
 
 # Resolves only the host part of the endpoint.

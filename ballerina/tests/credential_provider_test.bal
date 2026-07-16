@@ -81,7 +81,7 @@ isolated function testProfileProviderWithSessionToken() returns error? {
 isolated function testProcessCredentialProvider() returns error? {
     // The command prints a credential JSON document to stdout.
     CredentialProvider provider = check new ({
-        command: "cat tests/resources/process-credentials.json"
+        command: ["cat", "tests/resources/process-credentials.json"]
     });
     Credentials credentials = check provider.getCredentials();
     test:assertEquals(credentials.accessKeyId, "AKIDPROCESSEXAMPLE");
