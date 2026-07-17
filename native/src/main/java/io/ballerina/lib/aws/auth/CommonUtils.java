@@ -48,18 +48,21 @@ final class CommonUtils {
 
     /**
      * Creates the common {@code aws.auth:Error}.
+     *
+     * @param action    what was being attempted, e.g. {@code "closing the credential provider"}
+     * @param exception the exception that was caught
      */
-    static BError createError(String message, Throwable exception) {
+    static BError createError(String action, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
         return ErrorCreator.createError(
-                ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, null);
+                ModuleUtils.getModule(), ERROR, StringUtils.fromString(message(action)), cause, null);
     }
 
     /**
      * Creates an {@code aws.auth:CredentialResolutionError}, attaching the AWS
      * service error details when available.
      */
-    static BError createCredentialResolutionError(String message, Throwable exception) {
+    static BError createCredentialResolutionError(String action, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
         BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(
                 ModuleUtils.getModule(), ERROR_DETAILS);
@@ -81,15 +84,19 @@ final class CommonUtils {
             }
         }
         return ErrorCreator.createError(ModuleUtils.getModule(), CREDENTIAL_RESOLUTION_ERROR,
-                StringUtils.fromString(message), cause, errorDetails);
+                StringUtils.fromString(message(action)), cause, errorDetails);
     }
 
     /**
      * Creates an {@code aws.auth:SigningError}.
      */
-    static BError createSigningError(String message, Throwable exception) {
+    static BError createSigningError(String action, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
         return ErrorCreator.createError(
-                ModuleUtils.getModule(), SIGNING_ERROR, StringUtils.fromString(message), cause, null);
+                ModuleUtils.getModule(), SIGNING_ERROR, StringUtils.fromString(message(action)), cause, null);
+    }
+
+    private static String message(String action) {
+        return "Error occurred while " + action;
     }
 }

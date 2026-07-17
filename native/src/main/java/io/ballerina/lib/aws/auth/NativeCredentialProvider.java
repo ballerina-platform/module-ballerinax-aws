@@ -52,9 +52,7 @@ public final class NativeCredentialProvider {
             bProvider.addNativeData(NATIVE_PROVIDER, provider);
             return null;
         } catch (Exception e) {
-            String errorMsg = String.format("Error occurred while initializing the credential provider: %s",
-                    e.getMessage());
-            return CommonUtils.createCredentialResolutionError(errorMsg, e);
+            return CommonUtils.createCredentialResolutionError("initializing the credential provider", e);
         }
     }
 
@@ -65,8 +63,7 @@ public final class NativeCredentialProvider {
     public static Object getCredentials(BObject bProvider) {
         Object provider = bProvider.getNativeData(NATIVE_PROVIDER);
         if (!(provider instanceof AwsCredentialsProvider credentialsProvider)) {
-            return CommonUtils.createCredentialResolutionError(
-                    "Credential provider is not initialized or already closed",
+            return CommonUtils.createCredentialResolutionError("resolving the AWS credentials",
                     new IllegalStateException("Credential provider is not initialized or already closed"));
         }
         try {
@@ -80,9 +77,7 @@ public final class NativeCredentialProvider {
             }
             return result;
         } catch (Exception e) {
-            String errorMsg = String.format("Error occurred while resolving the AWS credentials: %s",
-                    e.getMessage());
-            return CommonUtils.createCredentialResolutionError(errorMsg, e);
+            return CommonUtils.createCredentialResolutionError("resolving the AWS credentials", e);
         }
     }
     /**
@@ -103,9 +98,7 @@ public final class NativeCredentialProvider {
             bProvider.addNativeData(NATIVE_PROVIDER, null);
             return null;
         } catch (Exception e) {
-            String errorMsg = String.format("Error occurred while closing the credential provider: %s",
-                    e.getMessage());
-            return CommonUtils.createError(errorMsg, e);
+            return CommonUtils.createError("closing the credential provider", e);
         }
     }
 }
