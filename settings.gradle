@@ -29,8 +29,10 @@ plugins {
 
 rootProject.name = 'module-ballerinax-aws.auth'
 
+include ':aws.auth-native'
 include ':aws.auth-ballerina'
 
+project(':aws.auth-native').projectDir = file("native")
 project(':aws.auth-ballerina').projectDir = file("ballerina")
 
 gradleEnterprise {

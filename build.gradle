@@ -58,6 +58,7 @@ allprojects {
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
 
 task build {
+    dependsOn(':aws.auth-native:build')
     dependsOn(':aws.auth-ballerina:build')
 }
 
