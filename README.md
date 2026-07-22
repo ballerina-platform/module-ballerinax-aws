@@ -28,15 +28,48 @@ Log into the [AWS Management Console](https://console.aws.amazon.com/console). I
 
 ### Create a user
 
-1. In the AWS Management Console, search for **IAM** in the services search bar and open it.
-2. Navigate to **Users** and click **Create user**.
-3. Provide a user name and attach the permission policies required by the AWS services you intend to call.
+1. In the AWS Management Console, search for IAM in the services search bar.
+2. Click on IAM
+
+   ![create-user-1.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/create-user-1.png)
+
+3. Click Users
+
+   ![create-user-2.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/create-user-2.png)
+
+4. Click Create User
+
+   ![create-user-3.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/create-user-3.png)
+
+5. Provide a suitable name for the user and continue
+
+   ![specify-user-details.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/specify-user-details.png)
+
+6. Attach the necessary permission policies directly to the user based on the AWS services you intend to call, and click next.
+
+   ![set-user-permissions.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/set-user-permissions.png)
+
+7. Review and create the user
+
+   ![review-create-user.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/review-create-user.png)
 
 ### Get user access keys
 
-1. Open the created user and go to the **Security credentials** tab.
-2. Click **Create access key** and select the appropriate use case.
-3. Copy the generated **Access key ID** and **Secret access key**.
+1. Click the user that created
+
+   ![users.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/users.png)
+
+2. Click `Create access key`
+
+   ![create-access-key-1.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/create-access-key-1.png)
+
+3. Click your use case and click next.
+
+   ![select-usecase.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/select-usecase.png)
+
+4. Record the Access Key and Secret access key. These credentials will be used to authenticate your Ballerina application with AWS.
+
+   ![retrieve-access-key.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/retrieve-access-key.png)
 
 > **Tip:** Static access keys are only one of the supported credential sources and the least preferred for production. On AWS infrastructure (EC2, ECS/EKS), prefer IAM roles via `DEFAULT_CREDENTIALS`; on developer machines, prefer a credentials file profile or IAM Identity Center (SSO). No access keys need to be created for those sources.
 

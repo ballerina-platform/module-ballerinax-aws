@@ -69,4 +69,25 @@ isolated function testResolveEndpointHost() {
     test:assertEquals(resolveEndpointHost("sns", US_WEST_2), "sns.us-west-2.amazonaws.com");
     test:assertEquals(resolveEndpointHost("sqs", US_EAST_1, {customEndpoint: "http://localhost:4566"}),
         "localhost:4566");
+    test:assertEquals(resolveEndpointHost("sqs", US_EAST_1, {customEndpoint: "localhost:4566"}),
+        "localhost:4566");
+}
+
+@test:Config {
+    groups: ["endpoint"]
+}
+isolated function testSdkDefaultPatternForUnbundledRegion() {
+    test:assertEquals(resolveEndpoint("sns", "aws-testregion-1"),
+        "https://sns.aws-testregion-1.amazonaws.com");
+    test:assertEquals(resolveEndpoint("sns", "cn-testregion-1", {dualstack: true}),
+        "https://sns.cn-testregion-1.api.amazonwebservices.com.cn");
+}
+
+@test:Config {
+    groups: ["endpoint"]
+}
+isolated function testFallbackEndpointConstruction() {
+    test:assertEquals(resolveEndpoint("sns", " "), "https://sns. .amazonaws.com");
+    test:assertEquals(resolveEndpoint("sns", " ", {fips: true}), "https://sns-fips. .amazonaws.com");
+    test:assertEquals(resolveEndpoint("sns", " ", {dualstack: true}), "https://sns. .api.aws");
 }
