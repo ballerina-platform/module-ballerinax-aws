@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import aws;
+
 # Signs a request with AWS Signature Version 4 and returns the headers to set
 # on the outbound request (`authorization`, `x-amz-date`, `x-amz-content-sha256`,
 # and `x-amz-security-token` for temporary credentials). Header names are
@@ -33,7 +35,7 @@
 # + region - Target region
 # + serviceName - Signing name of the target service (e.g. `s3`, `sns`)
 # + return - Headers to set on the outbound request, or a `SigningError`
-public isolated function getSignedHeaders(SignatureRequest req, Credentials credentials, Region|string region,
+public isolated function getSignedHeaders(SignatureRequest req, Credentials credentials, aws:Region|string region,
         string serviceName) returns map<string>|SigningError {
     return externGetSignedHeaders(req, credentials, region, serviceName);
 }

@@ -53,7 +53,7 @@ isolated function testStaticProviderWithSessionToken() returns error? {
 isolated function testProfileCredentialProvider() returns error? {
     CredentialProvider provider = check new ({
         profileName: "test-profile",
-        credentialsFilePath: "tests/resources/credentials"
+        credentialsFilePath: "modules/auth/tests/resources/credentials"
     });
     Credentials credentials = check provider.getCredentials();
     test:assertEquals(credentials.accessKeyId, "AKIDPROFILEEXAMPLE");
@@ -67,7 +67,7 @@ isolated function testProfileCredentialProvider() returns error? {
 isolated function testProfileProviderWithSessionToken() returns error? {
     CredentialProvider provider = check new ({
         profileName: "test-profile-session",
-        credentialsFilePath: "tests/resources/credentials"
+        credentialsFilePath: "modules/auth/tests/resources/credentials"
     });
     Credentials credentials = check provider.getCredentials();
     test:assertEquals(credentials.accessKeyId, "AKIDPROFILESESSION");
@@ -81,7 +81,7 @@ isolated function testProfileProviderWithSessionToken() returns error? {
 isolated function testProcessCredentialProvider() returns error? {
     // The command prints a credential JSON document to stdout.
     CredentialProvider provider = check new ({
-        command: ["cat", "tests/resources/process-credentials.json"]
+        command: ["cat", "modules/auth/tests/resources/process-credentials.json"]
     });
     Credentials credentials = check provider.getCredentials();
     test:assertEquals(credentials.accessKeyId, "AKIDPROCESSEXAMPLE");
@@ -94,7 +94,7 @@ isolated function testProcessCredentialProvider() returns error? {
 isolated function testWebIdentityInitSucceeds() returns error? {
     CredentialProvider _ = check new ({
         roleArn: "arn:aws:iam::111111111111:role/web-identity-role",
-        webIdentityTokenFile: "tests/resources/web-identity-token"
+        webIdentityTokenFile: "modules/auth/tests/resources/web-identity-token"
     });
 }
 
@@ -112,8 +112,11 @@ isolated function testSsoMissingCachedSessionReturnsError() returns error? {
     if credentials is Credentials {
         test:assertFail("Expected an error for a missing cached SSO session");
     } else {
-        test:assertTrue(credentials.message().includes("No cached SSO session found"),
-            "Unexpected error message: " + credentials.message());
+        test:assertEquals(credentials.message(), "Error occurred while resolving the AWS credentials");
+        error? cause = credentials.cause();
+        string causeMessage = cause is error ? cause.message() : "";
+        test:assertTrue(causeMessage.includes("No cached SSO session found"),
+            "Unexpected cause message: " + causeMessage);
     }
 }
 
@@ -133,8 +136,11 @@ isolated function testSsoSessionMissingCachedTokenReturnsError() returns error? 
     if credentials is Credentials {
         test:assertFail("Expected an error for a missing sso-session token");
     } else {
-        test:assertTrue(credentials.message().includes("Unable to load SSO token"),
-            "Unexpected error message: " + credentials.message());
+        test:assertEquals(credentials.message(), "Error occurred while resolving the AWS credentials");
+        error? cause = credentials.cause();
+        string causeMessage = cause is error ? cause.message() : "";
+        test:assertTrue(causeMessage.includes("Unable to load SSO token"),
+            "Unexpected cause message: " + causeMessage);
     }
 }
 
@@ -162,8 +168,11 @@ isolated function testCyclicSourceCredentialsRejected() {
     if provider is CredentialProvider {
         test:assertFail("Expected an error for a cyclic sourceCredentials chain");
     } else {
-        test:assertTrue(provider.message().includes("Circular sourceCredentials"),
-            "Unexpected error message: " + provider.message());
+        test:assertEquals(provider.message(), "Error occurred while initializing the credential provider");
+        error? cause = provider.cause();
+        string causeMessage = cause is error ? cause.message() : "";
+        test:assertTrue(causeMessage.includes("Circular sourceCredentials"),
+            "Unexpected cause message: " + causeMessage);
     }
 }
 
@@ -176,8 +185,12 @@ isolated function testMissingProfileReturnsError() {
         credentialsFilePath: "/tmp/nonexistent-aws-credentials-file"
     });
     test:assertTrue(provider is Error, "Expected an error for a missing credentials file");
-    test:assertEquals((<Error>provider).message(), "Error occurred while initializing the credential provider: " +
-        "Profile file '/tmp/nonexistent-aws-credentials-file' does not exist.");
+    Error err = <Error>provider;
+    test:assertEquals(err.message(), "Error occurred while initializing the credential provider");
+    error? cause = err.cause();
+    string causeMessage = cause is error ? cause.message() : "";
+    test:assertTrue(causeMessage.includes("Profile file '/tmp/nonexistent-aws-credentials-file' does not exist."),
+        "Unexpected cause message: " + causeMessage);
 }
 
 @test:Config {
@@ -211,7 +224,10 @@ isolated function testCloseReleasesProvider() returns error? {
     if credentials is Credentials {
         test:assertFail("Expected an error when resolving credentials after close");
     } else {
-        test:assertTrue(credentials.message().includes("already closed"),
-            "Unexpected error message: " + credentials.message());
+        test:assertEquals(credentials.message(), "Error occurred while resolving the AWS credentials");
+        error? cause = credentials.cause();
+        string causeMessage = cause is error ? cause.message() : "";
+        test:assertTrue(causeMessage.includes("already closed"),
+            "Unexpected cause message: " + causeMessage);
     }
 }

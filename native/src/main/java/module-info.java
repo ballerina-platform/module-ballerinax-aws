@@ -31,5 +31,6 @@ module io.ballerina.lib.aws.auth {
     requires software.amazon.awssdk.http.auth.spi;
     requires software.amazon.awssdk.utils;
 
+    exports io.ballerina.lib.aws;
     exports io.ballerina.lib.aws.auth;
 }

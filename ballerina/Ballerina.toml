@@ -1,13 +1,18 @@
 [package]
 distribution = "2201.12.0"
 org = "ballerinax"
-name = "aws.auth"
+name = "aws"
 version = "0.1.0"
 license = ["Apache-2.0"]
 authors = ["Ballerina"]
-keywords = ["Security/Authentication", "Vendor/Amazon", "AWS", "SigV4", "credentials"]
+keywords = ["Security/Authentication", "Vendor/Amazon", "Type/Library", "AWS", "SigV4", "credentials"]
 icon = "icon.png"
-repository = "https://github.com/ballerina-platform/module-ballerinax-aws.auth"
+repository = "https://github.com/ballerina-platform/module-ballerinax-aws"
+
+[[package.modules]]
+name = "aws.auth"
+description = "This module provides aws authentication functionalities"
+export = true
 
 [build-options]
 observabilityIncluded = true
@@ -17,9 +22,9 @@ graalvmCompatible = true
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.lib"
-artifactId = "aws.auth-native"
+artifactId = "aws-native"
 version = "0.1.0"
-path = "../native/build/libs/aws.auth-native-0.1.0-SNAPSHOT.jar"
+path = "../native/build/libs/aws-native-0.1.0-SNAPSHOT.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"

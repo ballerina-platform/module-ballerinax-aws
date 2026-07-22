@@ -2,7 +2,7 @@
 
 [AWS](https://aws.amazon.com/) is a comprehensive cloud computing platform offering over 200 services, all authenticated through a common scheme: IAM credentials and [AWS Signature Version 4](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html) request signing.
 
-The `ballerinax/aws.auth` package provides shared AWS authentication for the Ballerina ecosystem: credential resolution across all standardized AWS credential sources with automatic refresh, AWS Signature Version 4 request signing, and region-based endpoint resolution. It is the authentication foundation used by the `ballerinax/aws.*` connectors, and can be used directly to call AWS services that do not have a dedicated connector yet.
+The `ballerinax/aws` package provides shared AWS authentication and core utilities for the Ballerina ecosystem. It has two modules: the root module (`ballerinax/aws`) with the `Region` type and region-based endpoint resolution, and the `auth` submodule (`ballerinax/aws.auth`) with credential resolution across all standardized AWS credential sources (with automatic refresh) and AWS Signature Version 4 request signing. It is the authentication foundation used by the `ballerinax/aws.*` connectors, and can be used directly to call AWS services that do not have a dedicated connector yet.
 
 ### Key Features
 
@@ -34,11 +34,12 @@ Log into the [AWS Management Console](https://console.aws.amazon.com/console). I
 
 ## Quickstart
 
-To use the `aws.auth` package in your Ballerina application, update the `.bal` file as follows:
+To use the `ballerinax/aws` package in your Ballerina application, update the `.bal` file as follows:
 
-### Step 1: Import the module
+### Step 1: Import the modules
 
 ```ballerina
+import ballerinax/aws;
 import ballerinax/aws.auth;
 ```
 
@@ -113,11 +114,13 @@ auth:Credentials credentials = check credProvider.getCredentials();
 #### Resolve a service endpoint
 
 ```ballerina
-string url = auth:resolveEndpoint("events", auth:US_EAST_1);
+import ballerinax/aws;
+
+string url = aws:resolveEndpoint("events", aws:US_EAST_1);
 // "https://events.us-east-1.amazonaws.com"
 
 // For local testing, override with a custom endpoint (e.g. LocalStack):
-string testUrl = auth:resolveEndpoint("events", auth:US_EAST_1, {customEndpoint: "http://localhost:4566"});
+string testUrl = aws:resolveEndpoint("events", aws:US_EAST_1, {customEndpoint: "http://localhost:4566"});
 ```
 
 #### Sign a request
@@ -126,11 +129,12 @@ Sign requests to any AWS service including services without a dedicated Ballerin
 
 ```ballerina
 import ballerina/http;
+import ballerinax/aws;
 import ballerinax/aws.auth;
 
 public function main() returns error? {
     auth:CredentialProvider credProvider = check new (auth:DEFAULT_CREDENTIALS);
-    string host = auth:resolveEndpointHost("events", auth:US_EAST_1);
+    string host = aws:resolveEndpointHost("events", aws:US_EAST_1);
     http:Client eventBridge = check new ("https://" + host);
 
     json putEventsRequest = {
@@ -153,7 +157,7 @@ public function main() returns error? {
             "x-amz-target": "AWSEvents.PutEvents"
         },
         payload
-    }, credentials, auth:US_EAST_1, "events");
+    }, credentials, aws:US_EAST_1, "events");
 
     http:Request request = new;
     request.setBinaryPayload(payload);
