@@ -1,4 +1,4 @@
-# Ballerina AWS Package
+# Ballerina AWS library
 
 [![Build](https://github.com/ballerina-platform/module-ballerinax-aws/actions/workflows/ci.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-aws/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-aws/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-aws)
