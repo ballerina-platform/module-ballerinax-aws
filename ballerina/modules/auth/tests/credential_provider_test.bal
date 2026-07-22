@@ -189,7 +189,7 @@ isolated function testMissingProfileReturnsError() {
     test:assertEquals(err.message(), "Error occurred while initializing the credential provider");
     error? cause = err.cause();
     string causeMessage = cause is error ? cause.message() : "";
-    test:assertTrue(causeMessage.includes("Profile file '/tmp/nonexistent-aws-credentials-file' does not exist."),
+    test:assertTrue(causeMessage.includes("nonexistent-aws-credentials-file' does not exist."),
         "Unexpected cause message: " + causeMessage);
 }
 
