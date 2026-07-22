@@ -103,6 +103,22 @@ isolated function testGetSignedHeadersUnsignedPayload() returns error? {
 @test:Config {
     groups: ["signer"]
 }
+isolated function testGetSignedHeadersPublicApi() returns error? {
+    map<string> headers = check getSignedHeaders({
+        method: "GET",
+        host: "example.amazonaws.com"
+    }, signerTestCredentials, TEST_SIGNING_REGION, TEST_SIGNING_SERVICE);
+
+    test:assertEquals(headers["x-amz-content-sha256"], EMPTY_PAYLOAD_HASH);
+    test:assertTrue(headers["x-amz-date"] is string, "Expected an x-amz-date header");
+    string authorization = headers[AUTHORIZATION_HEADER] ?: "";
+    test:assertTrue(authorization.startsWith("AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/"),
+        "Unexpected authorization header: " + authorization);
+}
+
+@test:Config {
+    groups: ["signer"]
+}
 isolated function testGetSignedHeadersPayloadAffectsSignature() returns error? {
     map<string> headersA = check getSignedHeadersAt({
         method: "POST",
