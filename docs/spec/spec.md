@@ -68,7 +68,7 @@ The `ballerinax/aws` package factors these three concerns out into a single shar
 - The **root module** (`ballerinax/aws`) provides the `Region` type and region-based endpoint resolution.
 - The **`auth` submodule** (`ballerinax/aws.auth`) provides credential resolution across all AWS-standardized credential sources — with automatic refresh of expiring temporary credentials — and AWS Signature Version 4 request signing.
 
-Credential resolution, refresh, and SigV4 signing behavior in this package matches AWS's own tooling (CLI, SDKs) across credential sources, partitions, and signing edge cases.
+Each credential source follows AWS's own published format and protocol for that source (STS `AssumeRole`/`AssumeRoleWithWebIdentity`, SSO `GetRoleCredentials`, the `credential_process` contract, SigV4 signing). The exact resolution order for `DEFAULT_CREDENTIALS` is documented in [section 3.7](#37-default_credentials).
 
 Beyond functional requirements, the library addresses non-functional concerns including the security of credential handling described in the [Security](#7-security) section.
 
@@ -80,7 +80,7 @@ The root module (`ballerinax/aws`) provides two things: the `Region` enum and en
 
 #### 2.1.1 `Region` Type
 
-`Region` is a closed `string` enum covering every AWS commercial-partition region known at build time (standard, China, and GovCloud partitions):
+`Region` is a enum covering every region known at build time across the commercial, China, and GovCloud partitions:
 
 ```ballerina
 public enum Region {
@@ -225,15 +225,15 @@ The command is executed directly, without a shell — arguments are passed as an
 public const DEFAULT_CREDENTIALS = "DEFAULT_CREDENTIALS";
 ```
 
-A string constant (not a record) instructing the provider to resolve credentials via the AWS default credential provider chain, trying each of the following in order and taking the first source that yields credentials:
+A string constant instructing the provider to resolve credentials via the standard default credential provider chain, trying each of the following in order and taking the first that yields a result:
 
-1. Environment variables
-2. Web identity token (if `AWS_WEB_IDENTITY_TOKEN_FILE` is set)
-3. IAM Identity Center (SSO)
-4. Shared config/credentials files (profile)
-5. External process (if configured in `~/.aws/config`)
-6. Container credentials (ECS/EKS)
-7. EC2 instance profile (IMDS)
+1. Environment variables (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`, and `AWS_WEB_IDENTITY_TOKEN_FILE` if set)
+2. The shared config/credentials file's active profile (`AWS_PROFILE`, or `default` if unset) — which may itself resolve via SSO
+, an external process, or a chained `AssumeRole` call, depending on that profile's configuration
+3. Container credentials (ECS/EKS)
+4. EC2 instance profile (IMDS)
+
+>**Note:** This is the precedence of the standard default credential provider chain that this library relies on for `DEFAULT_CREDENTIALS`; other AWS SDKs or the AWS CLI may order or nest these sub-steps slightly differently in edge cases. Configuring an explicit `AuthConfig` variant ([sections 3.1–3.6](#3-credential-configuration)) instead of `DEFAULT_CREDENTIALS` avoids depending on this precedence at all.
 
 `DEFAULT_CREDENTIALS` is the right choice for code that runs on AWS infrastructure (EC2, ECS, EKS) or in a CI system with OIDC federation, since it needs no configuration and adapts to whichever identity the runtime environment already provides.
 
@@ -351,7 +351,7 @@ public isolated function resolveEndpointHost(string serviceName, Region|string r
         EndpointConfig config = {}) returns string;
 ```
 
-Resolves only the host part of the endpoint (no scheme) — the form expected by an `http:Client`'s base URL argument in some call patterns, or by code that needs to set the `Host` header explicitly. Internally calls `resolveEndpoint` and strips the `https://`/`http://` prefix.
+Resolves only the host part of the endpoint — no `http://`/`https://` scheme prefix. Use this when code needs to set the `Host` header explicitly. The returned value is not itself a URL and cannot be passed to `http:Client`'s constructor as-is.
 
 ###### Example:
 
