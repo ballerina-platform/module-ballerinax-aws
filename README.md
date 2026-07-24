@@ -8,93 +8,49 @@
 
 ## Overview
 
-[AWS](https://aws.amazon.com/) is a comprehensive cloud computing platform offering over 200 services, all authenticated through a common scheme: IAM credentials and [AWS Signature Version 4](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html) request signing.
+This library provides shared AWS authentication and core utilities for the Ballerina ecosystem.
 
-The `ballerinax/aws` package provides shared AWS authentication and core utilities for the Ballerina ecosystem. It has two modules: the root module (`ballerinax/aws`) with the `Region` type and region-based endpoint resolution, and the `auth` submodule (`ballerinax/aws.auth`) with credential resolution across all standardized AWS credential sources (with automatic refresh) and AWS Signature Version 4 request signing. It is the authentication foundation used by the `ballerinax/aws.*` connectors, and can be used directly to call AWS services that do not have a dedicated connector yet.
+[AWS](https://aws.amazon.com/) is a comprehensive cloud computing platform offering over 200 services, all authenticated through a common scheme: IAM credentials and [AWS Signature Version 4](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html) request signing. This library implements that scheme once, so it does not need to be re-implemented per AWS service.
 
-### Key Features
+The library has two modules: the root module (`ballerinax/aws`) with the `Region` type and region-based endpoint resolution, and the `auth` submodule (`ballerinax/aws.auth`) with credential resolution across all standardized AWS credential sources and AWS Signature Version 4 request signing. It is the authentication foundation used by the `ballerinax/aws.*` connectors, and can also be used directly to call AWS services that do not have a dedicated connector yet.
 
-- All standardized AWS credential sources: static keys, shared credentials file profiles, STS assume-role, web identity (OIDC/EKS IRSA), IAM Identity Center (SSO), external credential processes, and the default credential provider chain
-- Automatic refresh of expiring temporary credentials, backed by the AWS SDK credential providers
-- AWS Signature Version 4 request signing via the AWS SDK signer, validated against the official test vectors
-- Typed `Region` values and endpoint resolution covering all AWS partitions, FIPS/dualstack variants, and custom endpoint overrides (e.g. LocalStack)
-- GraalVM compatible for native image builds
+## Credential resolution
 
-## Setup guide
-
-### Login to AWS Console
-
-Log into the [AWS Management Console](https://console.aws.amazon.com/console). If you don't have an AWS account yet, you can create one by visiting the AWS [sign-up](https://aws.amazon.com/free/) page.
-
-### Create a user
-
-1. In the AWS Management Console, search for IAM in the services search bar.
-2. Click on IAM
-
-   ![create-user-1.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/create-user-1.png)
-
-3. Click Users
-
-   ![create-user-2.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/create-user-2.png)
-
-4. Click Create User
-
-   ![create-user-3.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/create-user-3.png)
-
-5. Provide a suitable name for the user and continue
-
-   ![specify-user-details.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/specify-user-details.png)
-
-6. Attach the necessary permission policies directly to the user based on the AWS services you intend to call, and click next.
-
-   ![set-user-permissions.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/set-user-permissions.png)
-
-7. Review and create the user
-
-   ![review-create-user.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/review-create-user.png)
-
-### Get user access keys
-
-1. Click the user that created
-
-   ![users.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/users.png)
-
-2. Click `Create access key`
-
-   ![create-access-key-1.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/create-access-key-1.png)
-
-3. Click your use case and click next.
-
-   ![select-usecase.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/select-usecase.png)
-
-4. Record the Access Key and Secret access key. These credentials will be used to authenticate your Ballerina application with AWS.
-
-   ![retrieve-access-key.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/main/docs/setup/resources/retrieve-access-key.png)
-
-> **Tip:** Static access keys are only one of the supported credential sources and the least preferred for production. On AWS infrastructure (EC2, ECS/EKS), prefer IAM roles via `DEFAULT_CREDENTIALS`; on developer machines, prefer a credentials file profile or IAM Identity Center (SSO). No access keys need to be created for those sources.
-
-## Quickstart
-
-To use the `ballerinax/aws` package in your Ballerina application, update the `.bal` file as follows:
-
-### Step 1: Import the modules
+The `auth:CredentialProvider` class resolves AWS credentials from a configured source and caches them, refreshing expiring temporary credentials (STS, SSO, instance-profile) automatically. Create one per configured source, at initialization, and reuse it for the lifetime of the application:
 
 ```ballerina
-import ballerinax/aws;
 import ballerinax/aws.auth;
+
+auth:CredentialProvider credProvider = check new (auth:DEFAULT_CREDENTIALS);
 ```
 
-### Step 2: Create a credential provider
+Fetch credentials per request; expiring temporary credentials are renewed transparently:
 
-Create a `CredentialProvider` once, at initialization. On AWS infrastructure, the default credential provider chain resolves credentials automatically — no configuration needed:
+```ballerina
+auth:Credentials credentials = check credProvider.getCredentials();
+```
+
+Release the provider's resources (background refresh threads, HTTP connections for STS/SSO) when it is no longer needed:
+
+```ballerina
+check credProvider.close();
+```
+
+### Credential sources
+
+`auth:CredentialProvider` accepts any of the following configurations as its `AuthConfig`.
+
+#### Default credential provider chain
+
+Resolves credentials automatically from the AWS SDK's default chain (environment variables, `~/.aws/credentials`, an EC2/ECS/EKS instance role, etc.) — no configuration needed. This is the preferred source when running on AWS infrastructure.
 
 ```ballerina
 auth:CredentialProvider credProvider = check new (auth:DEFAULT_CREDENTIALS);
 ```
 
-#### Alternative credential sources
+#### Static credentials
 
-##### Static credentials
+The least preferred source for production use; prefer one of the sources below when possible.
 
 ```ballerina
 auth:CredentialProvider credProvider = check new ({
@@ -103,7 +59,11 @@ auth:CredentialProvider credProvider = check new ({
 });
 ```
 
-##### Profile-based authentication
+> **Tip:** To create an access key, sign in to the [AWS Management Console](https://console.aws.amazon.com/console), open **IAM** → **Users** → create or select a user → **Security credentials** tab → **Create access key**.
+
+#### Profile-based authentication
+
+Reads credentials from a named profile in a local AWS credentials file (as created by `aws configure`).
 
 ```ballerina
 auth:CredentialProvider credProvider = check new ({
@@ -111,7 +71,9 @@ auth:CredentialProvider credProvider = check new ({
 });
 ```
 
-##### STS assume-role
+#### STS assume-role
+
+Obtains temporary credentials by assuming an IAM role via AWS STS.
 
 ```ballerina
 auth:CredentialProvider credProvider = check new ({
@@ -120,7 +82,9 @@ auth:CredentialProvider credProvider = check new ({
 });
 ```
 
-##### Web identity (EKS IRSA, CI/CD OIDC)
+#### Web identity (EKS IRSA, CI/CD OIDC)
+
+Exchanges a web identity (OIDC) token for temporary credentials via AWS STS.
 
 ```ballerina
 auth:CredentialProvider credProvider = check new ({
@@ -129,9 +93,9 @@ auth:CredentialProvider credProvider = check new ({
 });
 ```
 
-##### IAM Identity Center (SSO)
+#### IAM Identity Center (SSO)
 
-Requires an active session created with `aws sso login`:
+Requires an active session created with `aws sso login`.
 
 ```ballerina
 auth:CredentialProvider credProvider = check new ({
@@ -142,17 +106,21 @@ auth:CredentialProvider credProvider = check new ({
 });
 ```
 
-### Step 3: Use the APIs
+#### External credential process
 
-#### Resolve credentials
-
-Fetch credentials per request; expiring temporary credentials are renewed transparently:
+Executes an external command implementing the AWS `credential_process` contract, which must print a JSON credential document to stdout.
 
 ```ballerina
-auth:Credentials credentials = check credProvider.getCredentials();
+auth:CredentialProvider credProvider = check new ({
+    command: ["/usr/local/bin/aws_signing_helper", "credential-process", "--certificate", "/path/to/cert.pem"]
+});
 ```
 
-#### Resolve a service endpoint
+> **Security note:** the configured command runs with the privileges of the running program. Prefer declaring it in `~/.aws/config` (`credential_process`) and using profile-based authentication or the default credential provider chain where possible.
+
+## Region and endpoint resolution
+
+`aws:Region` is a typed enum of all AWS regions. Endpoints are resolved using the AWS SDK's own endpoint metadata, covering all partitions and the FIPS/dualstack variants, with a standard-pattern fallback for regions newer than the bundled SDK:
 
 ```ballerina
 import ballerinax/aws;
@@ -160,13 +128,25 @@ import ballerinax/aws;
 string url = aws:resolveEndpoint("events", aws:US_EAST_1);
 // "https://events.us-east-1.amazonaws.com"
 
-// For local testing, override with a custom endpoint (e.g. LocalStack):
-string testUrl = aws:resolveEndpoint("events", aws:US_EAST_1, {customEndpoint: "http://localhost:4566"});
+string host = aws:resolveEndpointHost("events", aws:US_EAST_1);
+// "events.us-east-1.amazonaws.com"
 ```
 
-#### Sign a request
+`EndpointConfig` selects the FIPS or dualstack variant, or overrides the endpoint entirely — useful for local testing against [LocalStack](https://www.localstack.cloud/) or similar:
 
-Sign requests to any AWS service including services without a dedicated Ballerina connector. The following calls Amazon EventBridge `PutEvents` over a plain `http:Client`:
+```ballerina
+string testUrl = aws:resolveEndpoint("events", aws:US_EAST_1, {customEndpoint: "http://localhost:4566"});
+// "http://localhost:4566"
+
+string fipsUrl = aws:resolveEndpoint("events", aws:US_EAST_1, {fips: true});
+// "https://events-fips.us-east-1.amazonaws.com"
+```
+
+## Request signing
+
+`auth:getSignedHeaders` signs a request with AWS Signature Version 4 and returns the headers to set on the outbound request. Use it to call any AWS service, including ones without a dedicated Ballerina connector.
+
+The following example calls Amazon EventBridge's `PutEvents` over a plain `http:Client`:
 
 ```ballerina
 import ballerina/http;
@@ -209,11 +189,15 @@ public function main() returns error? {
 }
 ```
 
-### Step 4: Run the Ballerina application
+## Errors
 
-```bash
-bal run
-```
+`auth:Error` is the base error type for the `auth` module. `auth:CredentialResolutionError` is returned when a configured credential source cannot supply credentials — its `ErrorDetails` are populated when the failure originates from an AWS service call (e.g. STS or SSO). `auth:SigningError` is returned when signing a request fails.
+
+## Issues and projects
+
+Issues and Projects tabs are disabled for this repository as this is part of the Ballerina library extended ecosystem. To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina Library repository](https://github.com/ballerina-platform/ballerina-library).
+
+This repository only contains the source code for the package.
 
 ## Build from the source
 
@@ -222,8 +206,17 @@ bal run
 1. Download and install Java SE Development Kit (JDK) version 21. You can download it from either of the following sources:
     * [Oracle JDK](https://www.oracle.com/java/technologies/downloads/)
     * [OpenJDK](https://adoptium.net/)
+
+    > **Note:** Set the `JAVA_HOME` environment variable to the path name of the directory into which you installed JDK.
+
 2. Download and install [Ballerina Swan Lake](https://ballerina.io/).
 3. Download and install [Docker](https://www.docker.com/get-started).
+4. Generate a GitHub access token with read package permissions, then set the following `env` variables:
+
+    ```shell
+    export packageUser=<Your GitHub Username>
+    export packagePAT=<GitHub Personal Access Token>
+    ```
 
 ### Build options
 
@@ -237,15 +230,27 @@ Execute the commands below to build from the source.
    ```bash
    ./gradlew clean test
    ```
-3. To build the without the tests:
+3. To run a group of tests:
+   ```bash
+   ./gradlew clean test -Pgroups=<test_group_names>
+   ```
+4. To build without the tests:
    ```bash
    ./gradlew clean build -x test
    ```
-4. To publish to the local Ballerina Central repository:
+5. To debug the package with a remote debugger:
+   ```bash
+   ./gradlew clean build -Pdebug=<port>
+   ```
+6. To debug with Ballerina language:
+   ```bash
+   ./gradlew clean build -PbalJavaDebug=<port>
+   ```
+7. To publish to the local Ballerina Central repository:
    ```bash
    ./gradlew clean build -PpublishToLocalCentral=true
    ```
-5. To publish to Ballerina Central:
+8. To publish to Ballerina Central:
    ```bash
    ./gradlew clean build -PpublishToCentral=true
    ```
@@ -262,7 +267,7 @@ All the contributors are encouraged to read the [Ballerina Code of Conduct](http
 
 ## Useful links
 
-* For more information go to the [`aws.auth` package](https://central.ballerina.io/ballerinax/aws.auth/latest).
+* For more information, go to the [`aws.auth` package](https://central.ballerina.io/ballerinax/aws.auth/latest).
 * For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
 * Chat live with us via our [Discord server](https://discord.gg/ballerinalang).
 * Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
