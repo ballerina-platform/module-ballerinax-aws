@@ -1,7 +1,5 @@
 ## Overview
 
-This library provides shared AWS authentication and core utilities for the Ballerina ecosystem.
-
 [AWS](https://aws.amazon.com/) is a comprehensive cloud computing platform offering over 200 services, all authenticated through a common scheme: IAM credentials and [AWS Signature Version 4](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html) request signing. This library implements that scheme once, so it does not need to be re-implemented per AWS service.
 
 The library has two modules: the root module (`ballerinax/aws`) with the `Region` type and region-based endpoint resolution, and the `auth` submodule (`ballerinax/aws.auth`) with credential resolution across all standardized AWS credential sources and AWS Signature Version 4 request signing. It is the authentication foundation used by the `ballerinax/aws.*` connectors, and can also be used directly to call AWS services that do not have a dedicated connector yet.
