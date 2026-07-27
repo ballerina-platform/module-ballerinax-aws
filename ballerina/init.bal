@@ -14,14 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import aws;
+import ballerina/jballerina.java;
 
-# Represents the common error type of AWS Auth.
-public type Error distinct error;
+function init() {
+    setModule();
+}
 
-# Represent the credential resolution errors. The fields of `aws:ErrorDetails` are
-# populated when the failure originates from an AWS service call (e.g. STS or SSO).
-public type CredentialResolutionError distinct Error & error<aws:ErrorDetails>;
-
-# Represent the SigV4 signing errors.
-public type SigningError distinct Error;
+function setModule() = @java:Method {
+    'class: "io.ballerina.lib.aws.ModuleUtils"
+} external;

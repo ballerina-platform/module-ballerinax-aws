@@ -18,6 +18,8 @@
 
 package io.ballerina.lib.aws.auth;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
@@ -33,6 +35,7 @@ import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 public final class NativeCredentialProvider {
 
     private static final String NATIVE_PROVIDER = "nativeProvider";
+    private static final String NATIVE_PROVIDER_CLOSED = "nativeProviderClosed";
 
     private static final String CREDENTIALS_RECORD = "Credentials";
     private static final BString CREDENTIALS_ACCESS_KEY_ID = StringUtils.fromString("accessKeyId");
@@ -47,6 +50,7 @@ public final class NativeCredentialProvider {
      * attaches it to the Ballerina object as native data.
      */
     public static Object initProvider(BObject bProvider, Object bConfig) {
+        bProvider.addNativeData(NATIVE_PROVIDER_CLOSED, new AtomicBoolean(false));
         try {
             AwsCredentialsProvider provider = ProviderFactory.buildProvider(bConfig);
             bProvider.addNativeData(NATIVE_PROVIDER, provider);
@@ -80,6 +84,7 @@ public final class NativeCredentialProvider {
             return CommonUtils.createCredentialResolutionError("resolving the AWS credentials", e);
         }
     }
+
     /**
      * Releases the resources held by the stored credentials provider
      * (background refresh threads, HTTP connections) when the provider
@@ -89,6 +94,10 @@ public final class NativeCredentialProvider {
      * @return {@code null} on success, or a Ballerina {@code aws.auth:Error}
      */
     public static Object close(BObject bProvider) {
+        if (!(bProvider.getNativeData(NATIVE_PROVIDER_CLOSED) instanceof AtomicBoolean closed)
+                || !closed.compareAndSet(false, true)) {
+            return null;
+        }
         Object provider = bProvider.getNativeData(NATIVE_PROVIDER);
         try {
             if (provider instanceof AwsCredentialsProvider credentialsProvider) {
