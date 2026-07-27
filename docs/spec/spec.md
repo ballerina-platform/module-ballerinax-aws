@@ -4,8 +4,7 @@ _Authors_: [@DimuthuMadushan](https://github.com/DimuthuMadushan) \
 _Reviewers_: [@daneshk](https://github.com/daneshk) \
 _Created_: 2026/07/23 \
 _Updated_: 2026/07/23 \
-_Edition_: Swan Lake \
-_AWS Signature Version_: [SigV4](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html)
+_Edition_: Swan Lake
 
 ## Introduction
 
