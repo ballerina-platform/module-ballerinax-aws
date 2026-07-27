@@ -31,7 +31,7 @@ import java.util.Objects;
 /**
  * Builds the {@code ballerinax/aws:ErrorDetails} record shared by the AWS connectors.
  */
-public final class AwsErrorUtils {
+public final class ErrorUtils {
     private static final String ERROR_DETAILS = "ErrorDetails";
     private static final BString ERROR_DETAILS_HTTP_STATUS_CODE = StringUtils.fromString("httpStatusCode");
     private static final BString ERROR_DETAILS_HTTP_STATUS_TEXT = StringUtils.fromString("httpStatusText");
@@ -39,7 +39,7 @@ public final class AwsErrorUtils {
     private static final BString ERROR_DETAILS_ERROR_MESSAGE = StringUtils.fromString("errorMessage");
     private static final BString ERROR_DETAILS_REQUEST_ID = StringUtils.fromString("requestId");
 
-    private AwsErrorUtils() {
+    private ErrorUtils() {
     }
 
     /**

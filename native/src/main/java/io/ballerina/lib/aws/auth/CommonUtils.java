@@ -18,7 +18,7 @@
 
 package io.ballerina.lib.aws.auth;
 
-import io.ballerina.lib.aws.AwsErrorUtils;
+import io.ballerina.lib.aws.ErrorUtils;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
@@ -54,7 +54,7 @@ final class CommonUtils {
      */
     static BError createCredentialResolutionError(String action, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
-        BMap<BString, Object> errorDetails = AwsErrorUtils.createErrorDetails(exception);
+        BMap<BString, Object> errorDetails = ErrorUtils.createErrorDetails(exception);
         return ErrorCreator.createError(ModuleUtils.getModule(), CREDENTIAL_RESOLUTION_ERROR,
                 StringUtils.fromString(message(action)), cause, errorDetails);
     }
