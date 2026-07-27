@@ -36,10 +36,10 @@ The conforming implementation of the specification is released. Any deviation fr
     * 4.1 [`Credentials`](#41-credentials)
     * 4.2 [`SignatureRequest`](#42-signaturerequest)
     * 4.3 [`EndpointConfig`](#43-endpointconfig)
+    * 4.4 [`ErrorDetails`](#44-errordetails)
 5. [Errors](#5-errors)
     * 5.1 [`Error`](#51-error)
     * 5.2 [`CredentialResolutionError`](#52-credentialresolutionerror)
-        * 5.2.1 [`ErrorDetails`](#521-errordetails)
     * 5.3 [`SigningError`](#53-signingerror)
 6. [Functions](#6-functions)
     * 6.1 [`resolveEndpoint`](#61-resolveendpoint)
@@ -279,25 +279,9 @@ Options controlling endpoint resolution, accepted by [`resolveEndpoint`](#61-res
 | `dualstack` | `boolean` | `false` | Use the dualstack (IPv4/IPv6) endpoint variant |
 | `customEndpoint` | `string?` | — | Full endpoint URL override (e.g. `http://localhost:4566` for LocalStack). When set, all other options are ignored |
 
-## 5. Errors
+### 4.4 `ErrorDetails`
 
-### 5.1 `Error`
-
-```ballerina
-public type Error distinct error;
-```
-
-The common base error type of the `auth` submodule. Returned by `CredentialProvider.close()` when releasing the underlying provider's resources fails.
-
-### 5.2 `CredentialResolutionError`
-
-```ballerina
-public type CredentialResolutionError distinct Error & error<ErrorDetails>;
-```
-
-Returned by `CredentialProvider.init` and `CredentialProvider.getCredentials()` when the configured credential source cannot supply credentials — an invalid configuration, a missing or expired SSO/web-identity session, a denied `AssumeRole` call, or a cyclic `sourceCredentials` chain (see [STS Role-Chaining Cycles](#74-sts-role-chaining-cycles)).
-
-#### 5.2.1 `ErrorDetails`
+The shared error details type for connectors. All AWS services report failures through the same envelope, so a single detail record lets user code handle errors uniformly across services.
 
 ```ballerina
 public type ErrorDetails record {|
@@ -305,10 +289,28 @@ public type ErrorDetails record {|
     string httpStatusText?;
     string errorCode?;
     string errorMessage?;
+    string requestId?;
 |};
 ```
 
-Populated only when the failure originates from an AWS service call (STS `AssumeRole`/`AssumeRoleWithWebIdentity`, SSO `GetRoleCredentials`); absent for purely local failures (a missing credentials file, a cyclic role chain).
+## 5. Errors
+
+### 5.1 `Error`
+
+The common base error type of the `auth` submodule.
+
+```ballerina
+public type Error distinct error;
+```
+
+### 5.2 `CredentialResolutionError`
+
+Returned when a credential-related error occurs in the `aws.auth` module.
+
+```ballerina
+public type CredentialResolutionError distinct Error & error<aws:ErrorDetails>;
+```
+Error details are populated only when the failure originates from an AWS service call (STS `AssumeRole`/`AssumeRoleWithWebIdentity`, SSO `GetRoleCredentials`); absent for purely local failures (a missing credentials file, a cyclic role chain).
 
 ### 5.3 `SigningError`
 
