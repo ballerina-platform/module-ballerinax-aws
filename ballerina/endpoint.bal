@@ -74,7 +74,7 @@ public isolated function resolveEndpointHost(string serviceName, Region|string r
 # + dualstack - Whether the dualstack variant is requested
 # + return - The DNS suffix (e.g. `amazonaws.com`)
 isolated function dnsSuffix(string regionCode, boolean dualstack) returns string {
-    if regionCode.startsWith("cn-") {
+    if regionCode.startsWith("cn-") || regionCode.startsWith("aws-cn-") {
         return dualstack ? "api.amazonwebservices.com.cn" : "amazonaws.com.cn";
     }
     return dualstack ? "api.aws" : "amazonaws.com";

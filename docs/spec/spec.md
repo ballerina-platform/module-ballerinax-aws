@@ -79,7 +79,7 @@ The root module (`ballerinax/aws`) provides two things: the `Region` enum and en
 
 #### 2.1.1 `Region` Type
 
-`Region` is a enum covering every region known at build time across the commercial, China, and GovCloud partitions:
+`Region` is an enum covering every region known at build time across the commercial, China, GovCloud, and ISO (government/defense-only) partitions, plus the partition-wide pseudo-regions used by global services (e.g. IAM, CloudFront):
 
 ```ballerina
 public enum Region {

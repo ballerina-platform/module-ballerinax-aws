@@ -14,9 +14,6 @@ name = "aws.auth"
 description = "This module provides aws authentication functionalities"
 export = true
 
-[build-options]
-observabilityIncluded = true
-
 [platform.java21]
 graalvmCompatible = true
 
