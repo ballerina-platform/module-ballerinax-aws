@@ -86,6 +86,14 @@ isolated function testSdkDefaultPatternForUnbundledRegion() {
 @test:Config {
     groups: ["endpoint"]
 }
+isolated function testDnsSuffixForChinaGlobalPseudoRegion() {
+    test:assertEquals(dnsSuffix("aws-cn-global", false), "amazonaws.com.cn");
+    test:assertEquals(dnsSuffix("aws-cn-global", true), "api.amazonwebservices.com.cn");
+}
+
+@test:Config {
+    groups: ["endpoint"]
+}
 isolated function testFallbackEndpointConstruction() {
     test:assertEquals(resolveEndpoint("sns", " "), "https://sns. .amazonaws.com");
     test:assertEquals(resolveEndpoint("sns", " ", {fips: true}), "https://sns-fips. .amazonaws.com");
