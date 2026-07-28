@@ -94,6 +94,19 @@ isolated function testDnsSuffixForChinaGlobalPseudoRegion() {
 @test:Config {
     groups: ["endpoint"]
 }
+isolated function testGlobalPseudoRegionEndpoint() {
+    test:assertEquals(resolveEndpoint("iam", AWS_GLOBAL), "https://iam.amazonaws.com");
+    test:assertEquals(resolveEndpoint("sts", AWS_GLOBAL), "https://sts.amazonaws.com");
+    test:assertEquals(resolveEndpoint("iam", AWS_CN_GLOBAL), "https://iam.cn-north-1.amazonaws.com.cn");
+    test:assertEquals(resolveEndpoint("route53", AWS_CN_GLOBAL), "https://route53.amazonaws.com.cn");
+    test:assertEquals(resolveEndpoint("iam", AWS_US_GOV_GLOBAL), "https://iam.us-gov.amazonaws.com");
+    test:assertEquals(resolveEndpoint("organizations", AWS_US_GOV_GLOBAL),
+        "https://organizations.us-gov-west-1.amazonaws.com");
+}
+
+@test:Config {
+    groups: ["endpoint"]
+}
 isolated function testFallbackEndpointConstruction() {
     test:assertEquals(resolveEndpoint("sns", " "), "https://sns. .amazonaws.com");
     test:assertEquals(resolveEndpoint("sns", " ", {fips: true}), "https://sns-fips. .amazonaws.com");
