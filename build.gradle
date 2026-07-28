@@ -71,8 +71,6 @@ subprojects {
         /* Standard libraries */
         ballerinaStdLibs "io.ballerina.stdlib:os-ballerina:${stdlibOsVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:io-ballerina:${stdlibIoVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${stdlibObserveVersion}"
-        ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
     }
 }
 
