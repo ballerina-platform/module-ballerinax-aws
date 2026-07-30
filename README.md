@@ -57,7 +57,7 @@ auth:CredentialProvider credProvider = check new ({
 });
 ```
 
-> **Tip:** To create an access key, sign in to the [AWS Management Console](https://console.aws.amazon.com/console), open **IAM** → **Users** → create or select a user → **Security credentials** tab → **Create access key**.
+> **Note:** See [Obtaining IAM user credentials](#obtaining-iam-user-credentials) below for a step-by-step walkthrough of creating an IAM user and its access keys in the AWS Console.
 
 #### Profile-based authentication
 
@@ -190,6 +190,59 @@ public function main() returns error? {
 ## Errors
 
 `auth:Error` is the base error type for the `auth` module. `auth:CredentialResolutionError` is returned when a configured credential source cannot supply credentials — its `aws:ErrorDetails` are populated when the failure originates from an AWS service call (e.g. STS or SSO). `auth:SigningError` is returned when signing a request fails.
+
+## Obtaining IAM user credentials
+
+IAM user access keys remain useful for local development, for CI systems without OIDC, and for the `sourceCredentials` of an assume-role chain. The steps below create such a user and its keys.
+
+### Login to AWS Console
+
+Log into the [AWS Management Console](https://console.aws.amazon.com/console). If you don't have an AWS account yet, you can create one by visiting the AWS [sign-up](https://aws.amazon.com/free/) page. Sign up is free, and you can explore many services under the Free Tier.
+
+### Create a user
+
+1. In the AWS Management Console, search for IAM in the services search bar.
+2. Click on IAM
+
+   ![create-user-1.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/create-user-1.png)
+
+3. Click Users
+
+   ![create-user-2.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/create-user-2.png)
+
+4. Click Create User
+
+   ![create-user-3.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/create-user-3.png)
+
+5. Provide a suitable name for the user and continue
+
+   ![specify-user-details.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/specify-user-details.png)
+
+6. Attach the permissions the application needs — by adding the user to a group, copying permissions from another user, or attaching policies directly — and click next. Grant only the actions your application calls.
+
+   ![set-user-permissions.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/set-user-permissions.png)
+
+7. Review and create the user
+
+   ![review-create-user.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/review-create-user.png)
+
+### Get user access keys
+
+1. Click the user that was created
+
+   ![users.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/users.png)
+
+2. Click `Create access key`
+
+   ![create-access-key-1.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/create-access-key-1.png)
+
+3. Click your use case and click next.
+
+   ![select-usecase.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/select-usecase.png)
+
+4. Record the access key ID and secret access key. The secret access key is shown only once — store it in a secret manager or a `Config.toml` that is excluded from version control, never in source.
+
+   ![retrieve-access-key.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws/refs/heads/master/docs/setup/resources/retrieve-access-key.png)
 
 ## Issues and projects
 
