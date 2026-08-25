@@ -17,7 +17,7 @@
 import aws;
 
 # Instructs the credential provider to resolve credentials via the AWS default
-# credential provider chain: environment variables, web identity token,
+# credential provider chain: JVM system properties, environment variables, web identity token,
 # IAM Identity Center (SSO), shared config/credentials files, external process,
 # container credentials (ECS/EKS), and EC2 instance profile (IMDS) — in order,
 # taking the first source that yields credentials.

@@ -40,7 +40,7 @@ check credProvider.close();
 
 #### Default credential provider chain
 
-Resolves credentials automatically from the AWS SDK's default chain (environment variables, `~/.aws/credentials`, an EC2/ECS/EKS instance role, etc.) — no configuration needed. This is the preferred source when running on AWS infrastructure.
+Resolves credentials automatically from the AWS SDK's default chain (JVM system properties, environment variables, `~/.aws/credentials`, an EC2/ECS/EKS instance role, etc.) — no configuration needed. This is the preferred source when running on AWS infrastructure.
 
 ```ballerina
 auth:CredentialProvider credProvider = check new (auth:DEFAULT_CREDENTIALS);
