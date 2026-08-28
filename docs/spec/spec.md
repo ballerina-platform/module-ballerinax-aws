@@ -226,11 +226,12 @@ public const DEFAULT_CREDENTIALS = "DEFAULT_CREDENTIALS";
 
 A string constant instructing the provider to resolve credentials via the standard default credential provider chain, trying each of the following in order and taking the first that yields a result:
 
-1. Environment variables (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`, and `AWS_WEB_IDENTITY_TOKEN_FILE` if set)
-2. The shared config/credentials file's active profile (`AWS_PROFILE`, or `default` if unset) — which may itself resolve via SSO
+1. JVM system properties (`aws.accessKeyId`/`aws.secretAccessKey`, and `aws.sessionToken` if set)
+2. Environment variables (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`, and `AWS_WEB_IDENTITY_TOKEN_FILE` if set)
+3. The shared config/credentials file's active profile (`AWS_PROFILE`, or `default` if unset) — which may itself resolve via SSO
 , an external process, or a chained `AssumeRole` call, depending on that profile's configuration
-3. Container credentials (ECS/EKS)
-4. EC2 instance profile (IMDS)
+4. Container credentials (ECS/EKS)
+5. EC2 instance profile (IMDS)
 
 >**Note:** This is the precedence of the standard default credential provider chain that this library relies on for `DEFAULT_CREDENTIALS`; other AWS SDKs or the AWS CLI may order or nest these sub-steps slightly differently in edge cases. Configuring an explicit `AuthConfig` variant ([sections 3.1–3.6](#3-credential-configuration)) instead of `DEFAULT_CREDENTIALS` avoids depending on this precedence at all.
 

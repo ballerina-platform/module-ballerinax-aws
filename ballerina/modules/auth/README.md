@@ -16,7 +16,7 @@ The `AuthConfig` union covers all standardized AWS credential sources:
 | `WebIdentityConfig` | An OIDC token exchanged via STS | EKS IRSA, CI/CD OIDC |
 | `SsoAuthConfig` | An IAM Identity Center session (`aws sso login`) | Enterprise developer machines |
 | `ProcessAuthConfig` | An external `credential_process` command | IAM Roles Anywhere, credential brokers |
-| `DEFAULT_CREDENTIALS` | The default provider chain (env vars, SSO, profile, container, EC2 IMDS, …) | Production on AWS |
+| `DEFAULT_CREDENTIALS` | The default provider chain (JVM system properties, env vars, SSO, profile, container, EC2 IMDS, …) | Production on AWS |
 
 ## Quickstart
 
