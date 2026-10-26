@@ -32,6 +32,7 @@ import software.amazon.awssdk.auth.credentials.ProcessCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
+import software.amazon.awssdk.core.interceptor.ExecutionInterceptor;
 import software.amazon.awssdk.profiles.ProfileFile;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sso.SsoClient;
@@ -208,12 +209,22 @@ public final class ProviderFactory {
      * Builds the STS client for the configured region, applying the optional
      * {@code stsEndpoint} options.
      */
+    @SuppressWarnings("unchecked")
     private static StsClient buildStsClient(BMap<BString, Object> config,
             AwsCredentialsProvider credentialsProvider) {
         StsClientBuilder builder = StsClient.builder()
                 .region(Region.of(config.getStringValue(STS_REGION).getValue()))
                 .credentialsProvider(credentialsProvider);
         applyOptionalEndpoint(builder, config, STS_ENDPOINT);
+        // STS uses the Query protocol, whose marshaller drops the custom endpoint's path
+        // (aws/aws-sdk-java-v2#3387). Only stsEndpoint.customEndpoint is restored; a path in an
+        // endpoint from AWS_ENDPOINT_URL_STS, AWS_ENDPOINT_URL or the profile is still dropped
+        // until the SDK bug is fixed.
+        if (config.containsKey(STS_ENDPOINT)) {
+            EndpointConfigUtils.getCustomEndpoint((BMap<BString, Object>) config.get(STS_ENDPOINT))
+                    .flatMap(EndpointPathInterceptor::forEndpoint)
+                    .ifPresent(interceptor -> addExecutionInterceptor(builder, interceptor));
+        }
         return builder.build();
     }
 
@@ -228,6 +239,17 @@ public final class ProviderFactory {
         if (config.containsKey(field)) {
             EndpointConfigUtils.applyEndpointConfig(builder, (BMap<BString, Object>) config.get(field));
         }
+    }
+
+    /**
+     * Adds an execution interceptor while keeping the builder's existing override
+     * configuration. Use this (not {@code overrideConfiguration(Consumer)}, which replaces
+     * the whole configuration) for any override set on the auth clients.
+     */
+    private static void addExecutionInterceptor(AwsClientBuilder<?, ?> builder, ExecutionInterceptor interceptor) {
+        builder.overrideConfiguration(builder.overrideConfiguration().toBuilder()
+                .addExecutionInterceptor(interceptor)
+                .build());
     }
 
     private static AwsCredentialsProvider buildSsoProvider(BMap<BString, Object> config) {
